@@ -1,0 +1,64 @@
+{
+  "items": [
+    {
+      "id": 1,
+      "title": "The Royal Navy & Gold Archway",
+      "subTitle": "Swarna Dwar & Sacred Brass Bell",
+      "category": "Architecture",
+      "src": "/images/temple_gate_arch.jpg",
+      "description": "The breathtaking entrance arch finished in royal navy with intricate golden floral meenakari filigree, framing the suspended temple bell and marble sanctum.",
+      "aspect": "portrait",
+      "order": 1,
+      "highlights": [
+        "24K Gold Carving Filigree",
+        "Resonant Brass Ghanta",
+        "Symmetrical Sacred Vista"
+      ]
+    },
+    {
+      "id": 2,
+      "title": "The Ancient Sacred Mahavriksha",
+      "subTitle": "Centuries-Old Banyan & Ashram Courtyard",
+      "category": "Sacred Nature",
+      "src": "/images/temple_courtyard_tree.jpg",
+      "description": "The majestic sprawling ancient tree standing proudly over the ashram's interlocking terracotta tile courtyard, casting serene protective shade over all pilgrims.",
+      "aspect": "landscape",
+      "order": 2,
+      "highlights": [
+        "Ancient Sprawling Canopy",
+        "Wavy Terracotta Courtyard",
+        "Vedic Tapasya Seat"
+      ]
+    },
+    {
+      "id": 3,
+      "title": "The Marble Porch & Sacred Shrines",
+      "subTitle": "Monsoon Serenity & Gnarled Roots",
+      "category": "Spiritual Grove",
+      "src": "/images/temple_porch_marble.jpg",
+      "description": "Looking outward from the polished white marble porch toward the ancient tree roots, orange Yajna Shala pavilion, and row of consecrated white samadhi shrines.",
+      "aspect": "portrait",
+      "order": 3,
+      "highlights": [
+        "Cool White Marble Slabs",
+        "Yajna Shala Pillars",
+        "Peaceful Overcast Atmosphere"
+      ]
+    },
+    {
+      "id": 4,
+      "title": "The Timeless Stone Archway",
+      "subTitle": "Architectural Foundation & Bell",
+      "category": "Heritage",
+      "src": "/images/temple_gate_raw.jpg",
+      "description": "The foundational stone gateway structure, showing the enduring architectural pillars, suspended bell, and the serene view into the temple sanctum.",
+      "aspect": "portrait",
+      "order": 4,
+      "highlights": [
+        "Artisan Stonework",
+        "Sacred Threads",
+        "Brick Pillars & Sanctum"
+      ]
+    }
+  ]
+}

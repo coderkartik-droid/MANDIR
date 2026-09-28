@@ -1,0 +1,91 @@
+{
+  "items": [
+    {
+      "id": "mahashivratri",
+      "name": "Maha Shivratri",
+      "hindi": "महाशिवरात्रि महापर्व",
+      "month": "Phalguna (Feb - Mar)",
+      "tag": "Supreme Night of Shiva",
+      "color": "from-amber-500/20 to-navy-900",
+      "border": "border-amber-500/40",
+      "description": "The grandest celebration at Ashram Jhadheena. All-night four-prahar Rudrabhishekam with milk, honey, bilva leaves, and sacred chants. Thousands gather for the divine darshan and midnight mahapuja.",
+      "rituals": [
+        "Akhand Shiv Chanting",
+        "Rudra Bilva Puja",
+        "All-night Jagran",
+        "Maha Aarti & Prasadam"
+      ],
+      "order": 1
+    },
+    {
+      "id": "sawan",
+      "name": "Pavitra Shravan Maas",
+      "hindi": "पवित्र सावन मास",
+      "month": "Shravan (July - August)",
+      "tag": "Monsoon of Devotion",
+      "color": "from-emerald-600/20 to-navy-900",
+      "border": "border-emerald-500/40",
+      "description": "The entire holy month is celebrated with devotional fervor as cool monsoon showers wash the temple courtyard. Kanwariyas and pilgrims arrive carrying holy Gangajal to bathe the sacred Shivling.",
+      "rituals": [
+        "Gangajal Jalabhishekam",
+        "Shravan Somwar Vrats",
+        "Bhakti Sangeet",
+        "Daily Flower Shringar"
+      ],
+      "order": 2
+    },
+    {
+      "id": "guru-purnima",
+      "name": "Guru Purnima",
+      "hindi": "गुरु पूर्णिमा उत्सव",
+      "month": "Ashadha (July)",
+      "tag": "Honor of the Lineage",
+      "color": "from-gold-500/20 to-navy-900",
+      "border": "border-gold-500/40",
+      "description": "Devotees from across the country congregate to bow at the holy feet of Shree Baba Sidhnath Ji and the revered Guru Parampara, renewing vows of selfless service, humility, and inner meditation.",
+      "rituals": [
+        "Paduka Pujan",
+        "Guru Vandana",
+        "Grand Ashram Bhandara",
+        "Spiritual Discourses (Satsang)"
+      ],
+      "order": 3
+    },
+    {
+      "id": "sidhnath-bhandara",
+      "name": "Sidhnath Varshik Bhandara",
+      "hindi": "सिद्धनाथ वार्षिक महाभंडारा",
+      "month": "Annual Mahotsav",
+      "tag": "Universal Annakshetra",
+      "color": "from-orange-500/20 to-navy-900",
+      "border": "border-orange-500/40",
+      "description": "A continuous 24-hour feast of divine consecrated food (Mahaprasad) offered to all without distinction of caste, creed, or status. The ashram echoes with kirtans and joyful community seva.",
+      "rituals": [
+        "Akhand Langar Seva",
+        "Sadhu Bhojan",
+        "Hawan Purnahuti",
+        "Divine Kirtan Darbar"
+      ],
+      "order": 4
+    },
+    {
+      "id": "diwali",
+      "name": "Diwali — Festival of Divine Light",
+      "hindi": "दीपावली महोत्सव",
+      "month": "Kartika (Oct – Nov)",
+      "tag": "Festival of Sacred Illumination",
+      "color": "from-yellow-500/20 to-navy-900",
+      "border": "border-yellow-500/40",
+      "description": "Thousands of oil diyas are lit across every surface of the ashram — the marble mandapa, the ancient tree base, the archway, and the samadhi shrines — creating a breathtaking ocean of golden light. Lakshmi puja, fireworks, and free laddoo prasad distribution mark this sacred evening of light, abundance, and gratitude.",
+      "rituals": [
+        "Ashram-wide Diya Illumination",
+        "Lakshmi–Ganesh Puja",
+        "Firework Celebration",
+        "Laddoo Prasad Distribution",
+        "Devotional Kirtan Night",
+        "Annakut Offering"
+      ],
+      "order": 5
+    }
+  ]
+}

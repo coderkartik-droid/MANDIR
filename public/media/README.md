@@ -1,8 +1,10 @@
 # Media Folder — Shree Baba Sidhnath Mandir
 
 All uploaded media is stored here inside the repository.
-Decap CMS uploads files into the correct subfolder automatically based on
-the `media_folder` / `public_folder` mapping in `public/admin/index.html`.
+The built-in Admin Panel (⚙️ icon → Login) lets you upload images, MP3 and MP4
+files. On **Export Content ZIP**, uploaded media is written into the
+`custom/` subfolders below, preserving this exact folder structure.
+Unzip the export into the project root and commit to publish.
 
 ## Folder Structure
 
@@ -10,15 +12,18 @@ the `media_folder` / `public_folder` mapping in `public/admin/index.html`.
 public/media/
 │
 ├── images/
-│   ├── gallery/        ← Photo gallery uploads (CMS: Photo Gallery collection)
+│   ├── gallery/        ← Photo gallery uploads
 │   ├── temple/         ← General temple images, video thumbnails
-│   ├── hero/           ← Hero / banner images (CMS: Featured Images → Hero)
-│   ├── festivals/      ← Festival imagery (CMS: Featured Images → Festivals)
-│   ├── icons/          ← Logo, favicon, icons (CMS: Featured Images → Logo)
-│   └── backgrounds/    ← Page background images
+│   ├── hero/           ← Hero / banner images
+│   ├── festivals/      ← Festival imagery
+│   ├── icons/          ← Logo, favicon, icons
+│   ├── backgrounds/    ← Page background images
+│   └── custom/         ← Images uploaded via the Admin Panel
 │
 ├── audio/              ← MP3 devotional music tracks
+│   └── custom/         ← Audio uploaded via the Admin Panel
 ├── video/              ← MP4 temple videos
+│   └── custom/         ← Videos uploaded via the Admin Panel
 └── documents/          ← PDFs, event schedules, press kits
 ```
 

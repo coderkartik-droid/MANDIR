@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Volume2, VolumeX, CloudRain, Sun, Sunset, Moon, Bell, Menu, X, Sparkles, Compass, Settings } from 'lucide-react';
 import { soundEngine } from '../utils/audioEngine';
+import { useAdminPanel } from '../admin/AdminPanel';
 
 export default function Navbar({
   isAudioPlaying,
@@ -16,6 +17,7 @@ export default function Navbar({
   const [scrolled, setScrolled] = useState(false);
   const [activeSection, setActiveSection] = useState('sanctuary');
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const { openAdminPanel } = useAdminPanel();
 
   useEffect(() => {
     const handleScroll = () => {
@@ -188,16 +190,14 @@ export default function Navbar({
               {isAudioPlaying ? <Volume2 className="w-3.5 h-3.5" /> : <VolumeX className="w-3.5 h-3.5" />}
             </button>
 
-            {/* Admin Settings Button */}
-            <a
-              href="/admin/"
-              target="_blank"
-              rel="noopener noreferrer"
+            {/* Admin Settings Button (Local Admin Panel) */}
+            <button
+              onClick={openAdminPanel}
               title="Admin Panel"
               className="p-2 rounded-full border border-gold-500/30 bg-navy-900/60 text-gold-300 hover:bg-gold-500/20 transition-all"
             >
               <Settings className="w-3.5 h-3.5" />
-            </a>
+            </button>
 
             {/* Mobile Drawer Menu Toggle */}
             <button

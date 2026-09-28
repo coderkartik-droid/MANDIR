@@ -1,6 +1,6 @@
 # Video Media Folder
 
-Upload MP4 video files here via the Decap CMS admin panel or directly via Git.
+Add MP4 video files here via the built-in Admin Panel (⚙️ icon → Login → Videos → Export Content ZIP) or directly via Git.
 
 Files placed here are served at `/media/video/<filename>.mp4`.
 

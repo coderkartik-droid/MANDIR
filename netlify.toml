@@ -1,7 +1,6 @@
 [build]
   command   = "npm run build"
   publish   = "dist"
-  functions = "netlify/functions"
 
 [build.environment]
   NODE_VERSION = "20"
@@ -17,21 +16,6 @@
   from   = "/*"
   to     = "/index.html"
   status = 200
-  # Exclude real files so assets, admin, and media are served directly
-  conditions = { Role = ["visitor"] }
-
-# ── Admin panel: always serve public/admin/index.html ─────────────────────────
-[[redirects]]
-  from   = "/admin"
-  to     = "/admin/index.html"
-  status = 200
-  force  = true
-
-[[redirects]]
-  from   = "/admin/"
-  to     = "/admin/index.html"
-  status = 200
-  force  = true
 
 # ── Security headers for every page ───────────────────────────────────────────
 [[headers]]
@@ -41,13 +25,6 @@
     X-Frame-Options         = "DENY"
     Referrer-Policy         = "strict-origin-when-cross-origin"
     Permissions-Policy      = "camera=(), microphone=(), geolocation=()"
-
-# ── Looser frame policy for /admin/ (Decap CMS needs iframes) ─────────────────
-[[headers]]
-  for = "/admin/*"
-  [headers.values]
-    X-Frame-Options        = "SAMEORIGIN"
-    X-Content-Type-Options = "nosniff"
 
 # ── Aggressive caching for hashed static assets ───────────────────────────────
 [[headers]]

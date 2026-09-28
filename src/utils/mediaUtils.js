@@ -8,14 +8,14 @@
  *   • Build clean, canonical media URLs from bare filenames
  *   • Provide a simple in-memory URL cache so the same path is never
  *     resolved more than once per session
- *   • Export folder constants that mirror public/admin/config.yml so
- *     there is exactly one place to change if the folder layout ever moves
+ *   • Export folder constants so there is exactly one place to change
+ *     if the folder layout ever moves
  *
  * Nothing here touches the DOM or React — pure functions only.
  */
 
 // ─── Canonical folder constants ───────────────────────────────────────────────
-// These must stay in sync with public/admin/index.html → cmsConfig media paths.
+// These must stay in sync with the media export paths in src/admin/zipUtils.js.
 
 export const MEDIA_PATHS = {
   gallery:     '/media/images/gallery',

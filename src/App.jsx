@@ -21,7 +21,10 @@ import { useTempleEntrance } from './hooks/useTempleEntrance';
 import { soundEngine } from './utils/audioEngine';
 import { Bell } from 'lucide-react';
 
-export default function App() {
+import { AdminProvider } from './admin/AdminContext';
+import AdminPanel from './admin/AdminPanel';
+
+function TempleSite() {
   const [scrollProgress, setScrollProgress] = useState(0);
   const [timeMode, setTimeMode] = useState('evening');
   const [isRain, setIsRain] = useState(false);
@@ -104,6 +107,7 @@ export default function App() {
   };
 
   return (
+    <AdminPanel>
     <div className="relative min-h-screen bg-navy-950 text-sacred-ivory font-sans selection:bg-gold-500 selection:text-navy-950">
       {/* Custom Sacred Golden Cursor */}
       <CustomCursor />
@@ -207,5 +211,14 @@ export default function App() {
       {/* Luxury Spiritual Footer */}
       <Footer onRingBell={handleRingBell} />
     </div>
+    </AdminPanel>
+  );
+}
+
+export default function App() {
+  return (
+    <AdminProvider>
+      <TempleSite />
+    </AdminProvider>
   );
 }

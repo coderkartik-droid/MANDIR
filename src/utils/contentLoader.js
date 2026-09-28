@@ -1,121 +1,79 @@
-/**
- * contentLoader.js
- *
- * Loads CMS-managed Markdown files from the content/ directory using
- * Vite's import.meta.glob with the ?raw query (returns file text).
- * Frontmatter is parsed with gray-matter (already a devDependency).
- *
- * All functions are synchronous — glob eagerly imports every .md file
- * at build time so there are no async waterfalls at runtime.
- *
- * API surface (unchanged from previous version so sections need no edits):
- *   getItem(collectionKey, slug?)  → single frontmatter object
- *   getList(collectionKey)         → array sorted by .order
- *   loadAllContent()               → { [collectionKey]: {...} }
- */
+import templeJson from '../../content/temple.json';
+import homeJson from '../../content/home.json';
+import contactJson from '../../content/contact.json';
+import festivalsJson from '../../content/festivals.json';
+import galleryJson from '../../content/gallery.json';
+import videosJson from '../../content/videos.json';
+import musicJson from '../../content/music.json';
+import mapsJson from '../../content/maps.json';
+import socialJson from '../../content/social.json';
+import imagesJson from '../../content/images.json';
+import themeJson from '../../content/theme.json';
+import animationsJson from '../../content/animations.json';
 
-import matter from 'gray-matter';
-
-// ─── Eager glob imports (Vite resolves at build time) ─────────────────────────
-// Each returns { './path/to/file.md': '<raw string content>', … }
-
-const templeInfoFiles       = import.meta.glob('../../content/temple-info/*.md',       { eager: true, query: '?raw', import: 'default' });
-const homePageFiles         = import.meta.glob('../../content/home-page/*.md',         { eager: true, query: '?raw', import: 'default' });
-const contactInfoFiles      = import.meta.glob('../../content/contact-info/*.md',      { eager: true, query: '?raw', import: 'default' });
-const festivalsFiles        = import.meta.glob('../../content/festivals/*.md',         { eager: true, query: '?raw', import: 'default' });
-const galleryFiles          = import.meta.glob('../../content/gallery/*.md',           { eager: true, query: '?raw', import: 'default' });
-const videosFiles           = import.meta.glob('../../content/videos/*.md',            { eager: true, query: '?raw', import: 'default' });
-const musicPlaylistFiles    = import.meta.glob('../../content/music-playlist/*.md',    { eager: true, query: '?raw', import: 'default' });
-const mapsFiles             = import.meta.glob('../../content/maps/*.md',              { eager: true, query: '?raw', import: 'default' });
-const socialLinksFiles      = import.meta.glob('../../content/social-links/*.md',      { eager: true, query: '?raw', import: 'default' });
-const imagesFiles           = import.meta.glob('../../content/images/*.md',            { eager: true, query: '?raw', import: 'default' });
-const themeColorsFiles      = import.meta.glob('../../content/theme-colors/*.md',      { eager: true, query: '?raw', import: 'default' });
-const animationFiles        = import.meta.glob('../../content/animation-settings/*.md',{ eager: true, query: '?raw', import: 'default' });
-
-// ─── Map of collection key → glob result ──────────────────────────────────────
-const COLLECTIONS = {
-  templeInfo:        templeInfoFiles,
-  homePage:          homePageFiles,
-  contactInfo:       contactInfoFiles,
-  festivals:         festivalsFiles,
-  gallery:           galleryFiles,
-  videos:            videosFiles,
-  musicPlaylist:     musicPlaylistFiles,
-  maps:              mapsFiles,
-  socialLinks:       socialLinksFiles,
-  images:            imagesFiles,
-  themeColors:       themeColorsFiles,
-  animationSettings: animationFiles,
+const SINGLETON_COLLECTIONS = {
+  templeInfo: templeJson,
+  homePage: homeJson,
+  contactInfo: contactJson,
+  maps: mapsJson,
+  socialLinks: socialJson,
+  images: imagesJson,
+  themeColors: themeJson,
+  animationSettings: animationsJson,
 };
 
-// ─── Internal helpers ─────────────────────────────────────────────────────────
+const LIST_COLLECTIONS = {
+  festivals: festivalsJson,
+  gallery: galleryJson,
+  videos: videosJson,
+  musicPlaylist: musicJson,
+};
 
-/**
- * Derive the slug from a glob path like '../../content/gallery/temple-arch.md'
- * → 'temple-arch'
- */
-function slugFromPath(path) {
-  return path.replace(/^.*\/([^/]+)\.md$/, '$1');
+function parseSingleton(jsonData) {
+  return { index: { ...jsonData, _slug: 'index' } };
 }
 
-/**
- * Parse every file in a glob map into { [slug]: frontmatterData }.
- * The markdown body is available as ._body if needed.
- */
-function parseCollection(globMap) {
+function parseList(jsonData) {
   const result = {};
-  for (const [path, rawContent] of Object.entries(globMap)) {
-    if (!rawContent) continue;
-    try {
-      const { data, content } = matter(rawContent);
-      const slug = slugFromPath(path);
-      result[slug] = { ...data, _body: content, _slug: slug };
-    } catch (err) {
-      console.warn(`[contentLoader] Failed to parse ${path}:`, err);
-    }
-  }
+  const items = jsonData.items || [];
+  items.forEach((item, idx) => {
+    const slug = item.id ? String(item.id) : `item_${idx}`;
+    result[slug] = { ...item, _slug: slug };
+  });
   return result;
 }
 
-// ─── Public API ───────────────────────────────────────────────────────────────
+function parseCollection(collectionKey) {
+  if (SINGLETON_COLLECTIONS[collectionKey] !== undefined) {
+    return parseSingleton(SINGLETON_COLLECTIONS[collectionKey]);
+  }
+  if (LIST_COLLECTIONS[collectionKey] !== undefined) {
+    return parseList(LIST_COLLECTIONS[collectionKey]);
+  }
+  console.warn(`[contentLoader] Unknown collection: "${collectionKey}"`);
+  return {};
+}
 
-/**
- * Load every collection and return the full content map.
- * Shape: { templeInfo: { index: {...} }, festivals: { mahashivratri: {...} }, … }
- */
 export function loadAllContent() {
   const result = {};
-  for (const [key, globMap] of Object.entries(COLLECTIONS)) {
-    result[key] = parseCollection(globMap);
-  }
+  Object.keys(SINGLETON_COLLECTIONS).forEach((key) => {
+    result[key] = parseSingleton(SINGLETON_COLLECTIONS[key]);
+  });
+  Object.keys(LIST_COLLECTIONS).forEach((key) => {
+    result[key] = parseList(LIST_COLLECTIONS[key]);
+  });
   return result;
 }
 
-/**
- * Return all items in a collection as a flat object keyed by slug.
- */
 export function getContent(collectionKey) {
-  const globMap = COLLECTIONS[collectionKey];
-  if (!globMap) {
-    console.warn(`[contentLoader] Unknown collection: "${collectionKey}"`);
-    return {};
-  }
-  return parseCollection(globMap);
+  return parseCollection(collectionKey);
 }
 
-/**
- * Return a single item from a collection by slug (defaults to 'index').
- * Returns {} if not found so callers can safely spread / access properties.
- */
 export function getItem(collectionKey, slug = 'index') {
   const collection = getContent(collectionKey);
   return collection[slug] ?? {};
 }
 
-/**
- * Return all items in a collection as an array, sorted ascending by .order.
- * Items without .order are placed at the end.
- */
 export function getList(collectionKey) {
   const collection = getContent(collectionKey);
   return Object.values(collection).sort((a, b) => {
@@ -125,4 +83,14 @@ export function getList(collectionKey) {
   });
 }
 
-export default { loadAllContent, getContent, getItem, getList };
+export function getRawJson(collectionKey) {
+  if (SINGLETON_COLLECTIONS[collectionKey] !== undefined) {
+    return SINGLETON_COLLECTIONS[collectionKey];
+  }
+  if (LIST_COLLECTIONS[collectionKey] !== undefined) {
+    return LIST_COLLECTIONS[collectionKey];
+  }
+  return null;
+}
+
+export default { loadAllContent, getContent, getItem, getList, getRawJson };

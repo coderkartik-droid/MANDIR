@@ -1,0 +1,12 @@
+{
+  "heroImage": "/images/temple_gate_arch.jpg",
+  "backgroundImage": "",
+  "logo": "",
+  "templeImages": [
+    "/images/temple_gate_arch.jpg",
+    "/images/temple_courtyard_tree.jpg",
+    "/images/temple_porch_marble.jpg",
+    "/images/temple_gate_raw.jpg"
+  ],
+  "festivalImages": []
+}

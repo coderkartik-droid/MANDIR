@@ -2,7 +2,8 @@
 # Docs: https://render.com/docs/blueprint-spec
 #
 # HOW AUTO-DEPLOY WORKS:
-#   1. You push a commit to GitHub (including CMS-authored commits from Decap).
+#   1. You push a commit to GitHub (including updated content/*.json files
+#      exported from the built-in Admin Panel).
 #   2. Render detects the push via GitHub webhook and triggers a new build.
 #   3. `npm run build` compiles the Vite app; the `dist/` folder is served.
 #
@@ -54,6 +55,3 @@ services:
       - path: /*
         name: X-Frame-Options
         value: "DENY"
-      - path: /admin/*
-        name: X-Frame-Options
-        value: "SAMEORIGIN"
