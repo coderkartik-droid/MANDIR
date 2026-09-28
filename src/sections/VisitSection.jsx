@@ -23,8 +23,8 @@ export default function VisitSection() {
   ];
 
   return (
-    <section id="visit" className="relative py-28 px-4 sm:px-6 lg:px-8 z-10">
-      <div className="max-w-7xl mx-auto">
+    <section id="visit" className="relative py-36 sm:py-44 px-4 sm:px-6 lg:px-8 z-10">
+      <div className="max-w-5xl mx-auto">
         {/* Section Header */}
         <div className="text-center max-w-3xl mx-auto mb-16">
           <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-gold-500/10 border border-gold-500/30 text-gold-300 font-cinzel text-xs tracking-widest mb-3">

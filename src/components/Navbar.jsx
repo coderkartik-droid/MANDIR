@@ -22,7 +22,7 @@ export default function Navbar({
       setScrolled(window.scrollY > 40);
 
       // Detect active section
-      const sections = ['sanctuary', 'panoramic-darshan', 'history', 'gallery', 'festivals', 'virtual-aarti', 'seva', 'visit'];
+      const sections = ['sanctuary', 'shivling-darshan', 'panoramic-darshan', 'history', 'gallery', 'festivals', 'virtual-aarti', 'visit'];
       const scrollPos = window.scrollY + 200;
       for (const s of sections) {
         const el = document.getElementById(s);
@@ -42,12 +42,12 @@ export default function Navbar({
 
   const navLinks = [
     { id: 'sanctuary', label: 'Sanctuary', href: '#sanctuary' },
+    { id: 'shivling-darshan', label: 'Shivling Darshan', href: '#shivling-darshan' },
     { id: 'panoramic-darshan', label: '360° Darshan', href: '#panoramic-darshan' },
     { id: 'history', label: 'History', href: '#history' },
     { id: 'gallery', label: 'Gallery', href: '#gallery' },
     { id: 'festivals', label: 'Festivals', href: '#festivals' },
     { id: 'virtual-aarti', label: 'Offer Diya', href: '#virtual-aarti' },
-    { id: 'seva', label: 'Seva & Donation', href: '#seva' },
     { id: 'visit', label: 'Visit Guide', href: '#visit' },
   ];
 
@@ -76,8 +76,8 @@ export default function Navbar({
         <div
           className={`max-w-7xl mx-auto rounded-full transition-all duration-500 flex items-center justify-between px-5 sm:px-7 py-2.5 sm:py-3 border ${
             scrolled
-              ? 'bg-navy-950/85 backdrop-blur-2xl border-gold-500/40 shadow-[0_10px_35px_rgba(0,0,0,0.8),0_0_20px_rgba(212,175,55,0.15)]'
-              : 'bg-navy-950/60 backdrop-blur-md border-gold-500/25 shadow-lg'
+              ? 'bg-navy-950/75 backdrop-blur-2xl border-gold-500/35 shadow-[0_10px_35px_rgba(0,0,0,0.8)]'
+              : 'bg-navy-950/45 backdrop-blur-md border-gold-500/20 shadow-lg'
           }`}
         >
           {/* Logo & Temple Title */}
@@ -87,7 +87,7 @@ export default function Navbar({
             className="flex items-center gap-3 group shrink-0"
           >
             {/* Rotating Sacred Om Emblem */}
-            <div className="relative w-10 h-10 rounded-full border border-gold-400/60 bg-gradient-to-tr from-navy-900 via-navy-850 to-gold-900/40 flex items-center justify-center text-gold-300 font-cinzel text-xl font-bold shadow-[0_0_15px_rgba(212,175,55,0.35)] group-hover:scale-105 transition-transform">
+            <div className="relative w-9 h-9 sm:w-10 sm:h-10 rounded-full border border-gold-400/60 bg-gradient-to-tr from-navy-900 via-navy-850 to-gold-900/40 flex items-center justify-center text-gold-300 font-cinzel text-lg sm:text-xl font-bold shadow-[0_0_15px_rgba(212,175,55,0.35)] group-hover:scale-105 transition-transform">
               <span className="relative z-10">ॐ</span>
               <div className="absolute inset-0 rounded-full border border-gold-400/30 animate-spin-slow opacity-60" />
             </div>

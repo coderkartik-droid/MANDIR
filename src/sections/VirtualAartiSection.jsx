@@ -46,8 +46,8 @@ export default function VirtualAartiSection({ onRingBell }) {
   };
 
   return (
-    <section id="virtual-aarti" className="relative py-28 px-4 sm:px-6 lg:px-8 z-10">
-      <div className="max-w-5xl mx-auto">
+    <section id="virtual-aarti" className="relative py-36 sm:py-44 px-4 sm:px-6 lg:px-8 z-10">
+      <div className="max-w-4xl mx-auto">
         {/* Section Header */}
         <div className="text-center max-w-3xl mx-auto mb-14">
           <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-gold-500/10 border border-gold-500/30 text-gold-300 font-cinzel text-xs tracking-widest mb-3">

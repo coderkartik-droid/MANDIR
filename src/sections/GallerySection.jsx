@@ -15,8 +15,8 @@ export default function GallerySection() {
     : galleryItems.filter((item) => item.category === filter);
 
   return (
-    <section id="gallery" className="relative py-28 px-4 sm:px-6 lg:px-8 z-10">
-      <div className="max-w-7xl mx-auto">
+    <section id="gallery" className="relative py-36 sm:py-44 px-4 sm:px-6 lg:px-8 z-10">
+      <div className="max-w-6xl mx-auto">
         {/* Section Header */}
         <div className="text-center max-w-3xl mx-auto mb-12">
           <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-gold-500/10 border border-gold-500/30 text-gold-300 font-cinzel text-xs tracking-widest mb-3">
@@ -99,7 +99,7 @@ export default function GallerySection() {
                 </div>
 
                 {/* Card Content Footer */}
-                <div className="p-6 bg-navy-950/80 border-t border-gold-500/20 flex flex-col justify-between flex-grow">
+                <div className="p-6 bg-navy-950/50 backdrop-blur-md border-t border-gold-500/20 flex flex-col justify-between flex-grow">
                   <div>
                     <span className="font-marcellus text-xs text-sacred-amber tracking-wider block mb-1">
                       {item.subTitle}

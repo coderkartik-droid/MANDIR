@@ -8,8 +8,8 @@ export default function FestivalsSection() {
   const [selectedFestival, setSelectedFestival] = useState(festivalList[0]);
 
   return (
-    <section id="festivals" className="relative py-28 px-4 sm:px-6 lg:px-8 z-10">
-      <div className="max-w-7xl mx-auto">
+    <section id="festivals" className="relative py-36 sm:py-44 px-4 sm:px-6 lg:px-8 z-10">
+      <div className="max-w-5xl mx-auto">
         {/* Section Header */}
         <div className="text-center max-w-3xl mx-auto mb-16">
           <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-gold-500/10 border border-gold-500/30 text-gold-300 font-cinzel text-xs tracking-widest mb-3">
@@ -40,10 +40,10 @@ export default function FestivalsSection() {
                     setSelectedFestival(fest);
                     soundEngine.ringTempleBell(0.35, 1.25);
                   }}
-                  className={`p-6 rounded-2xl border transition-all duration-300 cursor-pointer relative overflow-hidden group ${
+                  className={`p-6 rounded-2xl border transition-all duration-300 cursor-pointer relative overflow-hidden group backdrop-blur-md ${
                     isSelected
-                      ? 'bg-gradient-to-r from-navy-850 to-navy-900 border-gold-400 shadow-[0_0_25px_rgba(212,175,55,0.25)]'
-                      : 'bg-navy-950/60 border-gold-500/20 hover:border-gold-500/50 hover:bg-navy-900/50'
+                      ? 'bg-navy-950/60 border-gold-400 shadow-[0_0_25px_rgba(212,175,55,0.25)]'
+                      : 'bg-navy-950/35 border-gold-500/20 hover:border-gold-500/50 hover:bg-navy-950/50'
                   }`}
                 >
                   <div className="flex items-center justify-between mb-2">

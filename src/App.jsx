@@ -9,12 +9,12 @@ import AudioPlayer from './components/AudioPlayer';
 import Footer from './components/Footer';
 
 import HeroSection from './sections/HeroSection';
+import ShivlingSection from './sections/ShivlingSection';
 import Pseudo360Section from './sections/Pseudo360Section';
 import StorySection from './sections/StorySection';
 import GallerySection from './sections/GallerySection';
 import FestivalsSection from './sections/FestivalsSection';
 import VirtualAartiSection from './sections/VirtualAartiSection';
-import DonationSection from './sections/DonationSection';
 import VisitSection from './sections/VisitSection';
 
 import { useTempleEntrance } from './hooks/useTempleEntrance';
@@ -161,6 +161,9 @@ export default function App() {
           setTimeMode={handleTimeModeChange}
         />
 
+        {/* Dedicated 360° Shivling Darshan & Sacred Circumambulation (Pradakshina) */}
+        <ShivlingSection scrollProgress={scrollProgress} />
+
         {/* Pseudo 360° Ashram Darshan */}
         <Pseudo360Section />
 
@@ -175,9 +178,6 @@ export default function App() {
 
         {/* Virtual Aarti & Diya Offering */}
         <VirtualAartiSection onRingBell={handleRingBell} />
-
-        {/* Seva & Sacred Donations */}
-        <DonationSection />
 
         {/* Visit & Pilgrimage Guide */}
         <VisitSection />

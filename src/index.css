@@ -87,23 +87,23 @@
   box-shadow: 0 0 30px rgba(212, 175, 55, 0.3), inset 0 0 20px rgba(212, 175, 55, 0.1);
 }
 
-/* Glassmorphism containers */
+/* Glassmorphism containers - airy & translucent to highlight 3D temple background */
 .glass-panel {
-  background: rgba(11, 20, 43, 0.65);
+  background: rgba(11, 20, 43, 0.45);
   backdrop-filter: blur(16px);
   -webkit-backdrop-filter: blur(16px);
   border: 1px solid rgba(212, 175, 55, 0.2);
 }
 
 .glass-panel-dark {
-  background: rgba(7, 13, 30, 0.85);
+  background: rgba(7, 13, 30, 0.55);
   backdrop-filter: blur(20px);
   -webkit-backdrop-filter: blur(20px);
   border: 1px solid rgba(212, 175, 55, 0.25);
 }
 
 .glass-panel-gold {
-  background: radial-gradient(circle at top left, rgba(212, 175, 55, 0.12), rgba(7, 13, 30, 0.75));
+  background: radial-gradient(circle at top left, rgba(212, 175, 55, 0.1), rgba(7, 13, 30, 0.5));
   backdrop-filter: blur(16px);
   -webkit-backdrop-filter: blur(16px);
   border: 1px solid rgba(255, 215, 0, 0.3);
@@ -111,7 +111,9 @@
 
 /* Old manuscript / parchment styling */
 .parchment-card {
-  background: radial-gradient(circle at 50% 30%, #151F33 0%, #0B1323 100%);
+  background: radial-gradient(circle at 50% 30%, rgba(21, 31, 51, 0.5) 0%, rgba(11, 19, 35, 0.45) 100%);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
   position: relative;
   overflow: hidden;
 }

@@ -1,6 +1,6 @@
 import React from 'react';
 import { motion } from 'framer-motion';
-import { Sparkles, Heart, Bell, ArrowUp, Phone, Mail, MapPin, Globe, Share2, Compass } from 'lucide-react';
+import { Sparkles, Heart, Bell, ArrowUp, Phone, Mail, MapPin, Globe, Compass } from 'lucide-react';
 import { templeInfo, visitGuidelines } from '../data/templeData';
 import { soundEngine } from '../utils/audioEngine';
 
@@ -11,7 +11,7 @@ export default function Footer({ onRingBell }) {
   };
 
   return (
-    <footer className="relative bg-navy-950 border-t border-gold-500/30 pt-20 pb-12 px-4 sm:px-6 lg:px-8 z-10 text-sacred-ivory overflow-hidden">
+    <footer className="relative bg-navy-950/80 backdrop-blur-xl border-t border-gold-500/25 pt-24 pb-14 px-4 sm:px-6 lg:px-8 z-10 text-sacred-ivory overflow-hidden">
       {/* Temple Silhouette Decorative Skyline */}
       <div className="absolute top-0 inset-x-0 h-16 pointer-events-none opacity-20 flex justify-center items-end overflow-hidden">
         <svg viewBox="0 0 1200 120" className="w-full h-16 fill-gold-400">
@@ -20,7 +20,7 @@ export default function Footer({ onRingBell }) {
       </div>
 
       {/* Golden Divider with Centered Kalash & Animated Diya Flames */}
-      <div className="max-w-7xl mx-auto flex items-center justify-center gap-6 mb-16 relative">
+      <div className="max-w-7xl mx-auto flex items-center justify-center gap-6 mb-20 relative">
         <div className="h-[1.5px] flex-grow bg-gradient-to-r from-transparent via-gold-500/50 to-gold-400" />
 
         {/* Left Animated Diya */}
@@ -34,7 +34,7 @@ export default function Footer({ onRingBell }) {
         </div>
 
         {/* Center Sacred Emblem */}
-        <div className="w-12 h-12 rounded-full border-2 border-gold-400 bg-navy-900 flex items-center justify-center text-gold-300 font-cinzel text-xl font-bold shadow-[0_0_25px_rgba(212,175,55,0.4)]">
+        <div className="w-12 h-12 rounded-full border-2 border-gold-400 bg-navy-900/90 flex items-center justify-center text-gold-300 font-cinzel text-xl font-bold shadow-[0_0_25px_rgba(212,175,55,0.4)]">
           ॐ
         </div>
 
@@ -51,7 +51,7 @@ export default function Footer({ onRingBell }) {
         <div className="h-[1.5px] flex-grow bg-gradient-to-l from-transparent via-gold-500/50 to-gold-400" />
       </div>
 
-      <div className="max-w-7xl mx-auto grid grid-cols-1 md:grid-cols-12 gap-12 mb-16">
+      <div className="max-w-6xl mx-auto grid grid-cols-1 md:grid-cols-12 gap-12 mb-16">
         {/* Mandir Summary & Inscription */}
         <div className="md:col-span-5 space-y-4">
           <div className="flex items-center gap-3">
@@ -71,7 +71,7 @@ export default function Footer({ onRingBell }) {
             <span>{visitGuidelines.address}</span>
           </div>
 
-          {/* Social / Connect Icons (Custom SVG) */}
+          {/* Social / Connect Icons */}
           <div className="flex items-center gap-3 pt-3">
             <a
               href="#sanctuary"
@@ -113,6 +113,11 @@ export default function Footer({ onRingBell }) {
               </a>
             </li>
             <li>
+              <a href="#shivling-darshan" className="hover:text-gold-300 transition-colors flex items-center gap-1.5">
+                <span className="text-gold-500">✦</span> 360° Holy Shivling Darshan
+              </a>
+            </li>
+            <li>
               <a href="#panoramic-darshan" className="hover:text-gold-300 transition-colors flex items-center gap-1.5">
                 <span className="text-gold-500">✦</span> Pseudo 360° Ashram Darshan
               </a>
@@ -129,22 +134,17 @@ export default function Footer({ onRingBell }) {
             </li>
             <li>
               <a href="#festivals" className="hover:text-gold-300 transition-colors flex items-center gap-1.5">
-                <span className="text-gold-500">✦</span> Holy Festivals & Pujas
+                <span className="text-gold-500">✦</span> Holy Festivals & Observances
               </a>
             </li>
             <li>
               <a href="#virtual-aarti" className="hover:text-gold-300 transition-colors flex items-center gap-1.5">
-                <span className="text-gold-500">✦</span> Kindle a Diya & Offer Sankalpa
-              </a>
-            </li>
-            <li>
-              <a href="#seva" className="hover:text-gold-300 transition-colors flex items-center gap-1.5">
-                <span className="text-gold-500">✦</span> Seva & Charitable Donations
+                <span className="text-gold-500">✦</span> Kindle a Diya & Offer Prayers
               </a>
             </li>
             <li>
               <a href="#visit" className="hover:text-gold-300 transition-colors flex items-center gap-1.5">
-                <span className="text-gold-500">✦</span> Aarti Timings & Route Guide
+                <span className="text-gold-500">✦</span> Aarti Timings & Pilgrim Route
               </a>
             </li>
           </ul>
@@ -156,7 +156,7 @@ export default function Footer({ onRingBell }) {
             Vedic Inscription
           </h4>
 
-          <div className="p-5 rounded-2xl glass-panel-gold border border-gold-500/35 text-center shadow-lg">
+          <div className="p-5 rounded-2xl bg-navy-950/50 border border-gold-500/25 text-center shadow-lg backdrop-blur-md">
             <p className="font-sanskrit text-sm sm:text-base text-gold-300 mb-1.5">
               ॐ पूर्णमदः पूर्णमिदं पूर्णात्पूर्णमुदच्यते ।<br />
               पूर्णस्य पूर्णमादाय पूर्णमेवावशिष्यते ॥
@@ -169,7 +169,7 @@ export default function Footer({ onRingBell }) {
           <div className="pt-2 flex items-center justify-between">
             <button
               onClick={onRingBell}
-              className="px-5 py-2.5 rounded-full bg-navy-900 border border-gold-500/40 text-gold-300 text-xs font-cinzel hover:bg-gold-500/20 hover:scale-105 active:scale-95 transition-all flex items-center gap-2 shadow-md"
+              className="px-5 py-2.5 rounded-full bg-navy-900/80 border border-gold-500/40 text-gold-300 text-xs font-cinzel hover:bg-gold-500/20 hover:scale-105 active:scale-95 transition-all flex items-center gap-2 shadow-md"
             >
               <Bell className="w-3.5 h-3.5 animate-bell-sway" />
               <span>Ring Temple Bell</span>
@@ -177,7 +177,7 @@ export default function Footer({ onRingBell }) {
 
             <button
               onClick={scrollToTop}
-              className="p-3 rounded-full bg-navy-900 border border-gold-500/40 text-gold-300 hover:text-white hover:bg-gold-500/20 hover:scale-110 active:scale-95 transition-all shadow-md"
+              className="p-3 rounded-full bg-navy-900/80 border border-gold-500/40 text-gold-300 hover:text-white hover:bg-gold-500/20 hover:scale-110 active:scale-95 transition-all shadow-md"
               title="Return to Sanctuary Top"
             >
               <ArrowUp className="w-4 h-4" />
@@ -187,7 +187,7 @@ export default function Footer({ onRingBell }) {
       </div>
 
       {/* Bottom Legal & Creative Attribution */}
-      <div className="max-w-7xl mx-auto pt-8 border-t border-white/10 flex flex-col sm:flex-row items-center justify-between text-[11px] font-marcellus text-sacred-ivory/50 gap-4">
+      <div className="max-w-6xl mx-auto pt-8 border-t border-white/10 flex flex-col sm:flex-row items-center justify-between text-[11px] font-marcellus text-sacred-ivory/50 gap-4">
         <div>
           © {new Date().getFullYear()} Shree Baba Sidhnath Mandir Trust, Ashram Jhadheena. All rights reserved.
         </div>
