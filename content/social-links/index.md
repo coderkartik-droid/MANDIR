@@ -1,0 +1,7 @@
+---
+facebook: "https://facebook.com/babasidhnath"
+instagram: "https://instagram.com/babasidhnath"
+youtube: "https://youtube.com/@babasidhnath"
+whatsapp: "+91 98123 45678"
+email: "ashramjhadheena@babasidhnath.org"
+---

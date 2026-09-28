@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
   Play,
@@ -18,6 +18,8 @@ import {
 } from 'lucide-react';
 import { devotionalPlaylist } from '../data/playlistData';
 import { soundEngine } from '../utils/audioEngine';
+import { prefetchMetadata } from '../utils/mediaMetadata';
+import { formatDuration } from '../utils/mediaUtils';
 
 export default function AudioPlayer({ isEntering = false }) {
   const [currentTrackIndex, setCurrentTrackIndex] = useState(0);
@@ -31,23 +33,26 @@ export default function AudioPlayer({ isEntering = false }) {
   const [equalizerBands, setEqualizerBands] = useState([20, 45, 75, 55, 80, 40, 65, 30]);
   const [progressRatio, setProgressRatio] = useState(0);
 
-  const currentTrack = devotionalPlaylist[currentTrackIndex] || devotionalPlaylist[0];
+  // Enriched playlist — starts as the static CMS/default data, then gets
+  // duration/fileSize/bitrate/format filled in lazily on first expand.
+  const [enrichedPlaylist, setEnrichedPlaylist] = useState(devotionalPlaylist);
+  const metadataFetchedRef = useRef(false);
 
+  const currentTrack = enrichedPlaylist[currentTrackIndex] || enrichedPlaylist[0];
+
+  // ── Lazy metadata enrichment ─────────────────────────────────────────────
+  // Runs once, only when the player is first expanded, so it never blocks
+  // the initial page render.
   useEffect(() => {
-    try {
-      const savedIndex = localStorage.getItem('mandir_track_index');
-      if (savedIndex !== null) {
-        const idx = parseInt(savedIndex, 10);
-        if (idx >= 0 && idx < devotionalPlaylist.length) {
-          setCurrentTrackIndex(idx);
-        }
-      }
-      const savedLoop = localStorage.getItem('mandir_audio_loop');
-      if (savedLoop !== null) setIsLooping(savedLoop === 'true');
-      const savedShuffle = localStorage.getItem('mandir_audio_shuffle');
-      if (savedShuffle !== null) setIsShuffling(savedShuffle === 'true');
-    } catch {}
-  }, []);
+    if (!isExpanded || metadataFetchedRef.current) return;
+    metadataFetchedRef.current = true;
+
+    prefetchMetadata(devotionalPlaylist, 'audio', 2).then((enriched) => {
+      setEnrichedPlaylist(enriched);
+    }).catch(() => {
+      // Metadata fetch failed — keep static data unchanged
+    });
+  }, [isExpanded]);
 
   useEffect(() => {
     soundEngine.setVolume(volume);
@@ -135,30 +140,27 @@ export default function AudioPlayer({ isEntering = false }) {
   const handleNextTrack = () => {
     let nextIdx;
     if (isShuffling) {
-      nextIdx = Math.floor(Math.random() * devotionalPlaylist.length);
+      nextIdx = Math.floor(Math.random() * enrichedPlaylist.length);
     } else {
-      nextIdx = (currentTrackIndex + 1) % devotionalPlaylist.length;
+      nextIdx = (currentTrackIndex + 1) % enrichedPlaylist.length;
     }
     setCurrentTrackIndex(nextIdx);
-    localStorage.setItem('mandir_track_index', String(nextIdx));
-    const nextTrack = devotionalPlaylist[nextIdx];
+    const nextTrack = enrichedPlaylist[nextIdx];
     soundEngine.playTrack(nextTrack, 2.0);
     setIsPlaying(true);
   };
 
   const handlePrevTrack = () => {
-    const prevIdx = (currentTrackIndex - 1 + devotionalPlaylist.length) % devotionalPlaylist.length;
+    const prevIdx = (currentTrackIndex - 1 + enrichedPlaylist.length) % enrichedPlaylist.length;
     setCurrentTrackIndex(prevIdx);
-    localStorage.setItem('mandir_track_index', String(prevIdx));
-    const prevTrack = devotionalPlaylist[prevIdx];
+    const prevTrack = enrichedPlaylist[prevIdx];
     soundEngine.playTrack(prevTrack, 2.0);
     setIsPlaying(true);
   };
 
   const handleSelectTrack = (idx) => {
     setCurrentTrackIndex(idx);
-    localStorage.setItem('mandir_track_index', String(idx));
-    const track = devotionalPlaylist[idx];
+    const track = enrichedPlaylist[idx];
     soundEngine.playTrack(track, 1.8);
     setIsPlaying(true);
     setShowPlaylist(false);
@@ -170,19 +172,11 @@ export default function AudioPlayer({ isEntering = false }) {
   };
 
   const toggleLoop = () => {
-    setIsLooping((prev) => {
-      const next = !prev;
-      localStorage.setItem('mandir_audio_loop', String(next));
-      return next;
-    });
+    setIsLooping((prev) => !prev);
   };
 
   const toggleShuffle = () => {
-    setIsShuffling((prev) => {
-      const next = !prev;
-      localStorage.setItem('mandir_audio_shuffle', String(next));
-      return next;
-    });
+    setIsShuffling((prev) => !prev);
   };
 
   const handleScrubberClick = (e) => {
@@ -267,6 +261,26 @@ export default function AudioPlayer({ isEntering = false }) {
                 <span className="font-marcellus text-[10px] text-sacred-amber uppercase tracking-wider block mt-0.5">
                   {currentTrack.category} • {currentTrack.tag}
                 </span>
+                {/* Live metadata badges — shown once enrichment completes */}
+                {(currentTrack.fileSize || currentTrack.bitrate || currentTrack.format) && (
+                  <div className="flex flex-wrap gap-1.5 mt-1.5">
+                    {currentTrack.format && (
+                      <span className="text-[9px] font-cinzel px-1.5 py-0.5 rounded bg-navy-900 border border-gold-500/20 text-gold-400/80 uppercase tracking-widest">
+                        {currentTrack.format}
+                      </span>
+                    )}
+                    {currentTrack.bitrate && (
+                      <span className="text-[9px] font-cinzel px-1.5 py-0.5 rounded bg-navy-900 border border-gold-500/20 text-gold-400/80">
+                        {currentTrack.bitrate}
+                      </span>
+                    )}
+                    {currentTrack.fileSize && (
+                      <span className="text-[9px] font-cinzel px-1.5 py-0.5 rounded bg-navy-900 border border-gold-500/20 text-sacred-ivory/50">
+                        {currentTrack.fileSize}
+                      </span>
+                    )}
+                  </div>
+                )}
               </div>
             </div>
 
@@ -296,7 +310,7 @@ export default function AudioPlayer({ isEntering = false }) {
                 />
               </div>
               <div className="flex justify-between text-[10px] font-cinzel text-sacred-ivory/50 mt-1">
-                <span>00:{Math.floor(progressRatio * 60).toString().padStart(2, '0')}</span>
+                <span>{formatDuration(progressRatio * (soundEngine.duration || 0))}</span>
                 <span>{currentTrack.duration}</span>
               </div>
             </div>
@@ -398,7 +412,7 @@ export default function AudioPlayer({ isEntering = false }) {
                   <span className="font-cinzel text-[10px] text-sacred-amber uppercase tracking-wider block mb-1">
                     Select Divine Instrumental Soundscape:
                   </span>
-                  {devotionalPlaylist.map((item, idx) => (
+                  {enrichedPlaylist.map((item, idx) => (
                     <div
                       key={item.id}
                       onClick={() => handleSelectTrack(idx)}
@@ -419,9 +433,16 @@ export default function AudioPlayer({ isEntering = false }) {
                           </span>
                         </div>
                       </div>
-                      <span className="font-cinzel text-[10px] text-sacred-ivory/50 shrink-0 ml-2">
-                        {item.duration}
-                      </span>
+                      <div className="flex flex-col items-end shrink-0 ml-2 gap-0.5">
+                        <span className="font-cinzel text-[10px] text-sacred-ivory/50">
+                          {item.duration}
+                        </span>
+                        {item.fileSize && (
+                          <span className="font-cinzel text-[9px] text-gold-500/50">
+                            {item.fileSize}
+                          </span>
+                        )}
+                      </div>
                     </div>
                   ))}
                 </motion.div>

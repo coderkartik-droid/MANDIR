@@ -1,0 +1,11 @@
+---
+rain: false
+fog: false
+particles: true
+bellAnimation: true
+flowerPetals: false
+fireflies: true
+bloom: true
+music: true
+cameraMotion: true
+---

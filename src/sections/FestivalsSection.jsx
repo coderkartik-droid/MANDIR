@@ -1,11 +1,27 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Calendar, Sparkles, ChevronRight, Moon, Flame, Heart, Shield } from 'lucide-react';
 import { festivalList } from '../data/templeData';
+import { getList } from '../utils/contentLoader';
 import { soundEngine } from '../utils/audioEngine';
 
 export default function FestivalsSection() {
+  const [festivals, setFestivals] = useState(festivalList);
   const [selectedFestival, setSelectedFestival] = useState(festivalList[0]);
+
+  useEffect(() => {
+    const cmsFestivals = getList('festivals');
+    if (cmsFestivals.length > 0) {
+      // Ensure every item has an id (fall back to _slug)
+      const normalised = cmsFestivals.map((f) => ({
+        ...f,
+        id: f.id ?? f._slug,
+        rituals: Array.isArray(f.rituals) ? f.rituals : [],
+      }));
+      setFestivals(normalised);
+      setSelectedFestival(normalised[0]);
+    }
+  }, []);
 
   return (
     <section id="festivals" className="relative py-36 sm:py-44 px-4 sm:px-6 lg:px-8 z-10">
@@ -30,7 +46,7 @@ export default function FestivalsSection() {
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
           {/* Festival Selection Cards (Left Column) */}
           <div className="lg:col-span-5 space-y-4">
-            {festivalList.map((fest) => {
+            {festivals.map((fest) => {
               const isSelected = selectedFestival.id === fest.id;
 
               return (

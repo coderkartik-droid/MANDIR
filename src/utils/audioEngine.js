@@ -60,19 +60,11 @@ class SpiritualAudioEngine {
   }
 
   loadSettings() {
-    try {
-      const savedVol = localStorage.getItem('mandir_audio_volume');
-      if (savedVol !== null) this.volume = parseFloat(savedVol);
-      const savedMute = localStorage.getItem('mandir_audio_muted');
-      if (savedMute !== null) this.isMuted = savedMute === 'true';
-    } catch {}
+    // Volume and mute state are session-only; not persisted to localStorage
   }
 
   saveSettings() {
-    try {
-      localStorage.setItem('mandir_audio_volume', String(this.volume));
-      localStorage.setItem('mandir_audio_muted', String(this.isMuted));
-    } catch {}
+    // No-op: state is session-only
   }
 
   init() {

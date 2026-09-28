@@ -1,9 +1,19 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { MapPin, Clock, Compass, Car, Train, Plane, Phone, Mail, Navigation, ShieldCheck } from 'lucide-react';
 import { templeSchedule, visitGuidelines } from '../data/templeData';
+import { getItem } from '../utils/contentLoader';
 
 export default function VisitSection() {
+  const [contactInfo, setContactInfo] = useState(visitGuidelines);
+
+  useEffect(() => {
+    const cmsContactInfo = getItem('contactInfo', 'index');
+    if (cmsContactInfo && Object.keys(cmsContactInfo).length > 0) {
+      setContactInfo((prev) => ({ ...prev, ...cmsContactInfo }));
+    }
+  }, []);
+
   const nearbyAttractions = [
     {
       name: "Maa Bhimeshwari Devi Mandir, Beri",
@@ -106,7 +116,7 @@ export default function VisitSection() {
               </div>
 
               <p className="font-marcellus text-xs sm:text-sm text-sacred-ivory/90 mb-4 leading-relaxed">
-                <strong>Address:</strong> {visitGuidelines.address}
+                <strong>Address:</strong> {contactInfo.address}
               </p>
 
               {/* Stylized Map Viewport */}
@@ -122,7 +132,7 @@ export default function VisitSection() {
                     Shree Baba Sidhnath Mandir
                   </h4>
                   <span className="font-marcellus text-xs text-sacred-ivory/70">
-                    GPS: {visitGuidelines.coordinates}
+                    GPS: {contactInfo.latitude}, {contactInfo.longitude}
                   </span>
                 </div>
 
@@ -141,11 +151,11 @@ export default function VisitSection() {
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 text-xs font-marcellus">
                 <div className="flex items-center gap-2 p-2.5 rounded-xl bg-navy-950/60 border border-gold-500/20">
                   <Phone className="w-3.5 h-3.5 text-gold-400" />
-                  <span>{visitGuidelines.phone}</span>
+                  <span>{contactInfo.phone}</span>
                 </div>
                 <div className="flex items-center gap-2 p-2.5 rounded-xl bg-navy-950/60 border border-gold-500/20">
                   <Mail className="w-3.5 h-3.5 text-gold-400" />
-                  <span>{visitGuidelines.email}</span>
+                  <span>{contactInfo.email}</span>
                 </div>
               </div>
             </div>

@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Volume2, VolumeX, CloudRain, Sun, Sunset, Moon, Bell, Menu, X, Sparkles, Compass } from 'lucide-react';
+import { Volume2, VolumeX, CloudRain, Sun, Sunset, Moon, Bell, Menu, X, Sparkles, Compass, Settings } from 'lucide-react';
 import { soundEngine } from '../utils/audioEngine';
 
 export default function Navbar({
@@ -187,6 +187,17 @@ export default function Navbar({
             >
               {isAudioPlaying ? <Volume2 className="w-3.5 h-3.5" /> : <VolumeX className="w-3.5 h-3.5" />}
             </button>
+
+            {/* Admin Settings Button */}
+            <a
+              href="/admin/"
+              target="_blank"
+              rel="noopener noreferrer"
+              title="Admin Panel"
+              className="p-2 rounded-full border border-gold-500/30 bg-navy-900/60 text-gold-300 hover:bg-gold-500/20 transition-all"
+            >
+              <Settings className="w-3.5 h-3.5" />
+            </a>
 
             {/* Mobile Drawer Menu Toggle */}
             <button

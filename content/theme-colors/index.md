@@ -1,0 +1,9 @@
+---
+primary: "#1e3a5f"
+secondary: "#D4AF37"
+goldAccent: "#FFD700"
+background: "#0a1628"
+text: "#f5f5dc"
+glow: "#D4AF37"
+button: "#D4AF37"
+---

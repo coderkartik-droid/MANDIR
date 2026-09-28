@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Bell, Sparkles, Volume2, CloudRain, ArrowDown, Compass, Play } from 'lucide-react';
 import { templeInfo } from '../data/templeData';
+import { getItem } from '../utils/contentLoader';
 
 export default function HeroSection({
   onRingBell,
@@ -16,6 +17,16 @@ export default function HeroSection({
 }) {
   const [showBlessing, setShowBlessing] = useState(false);
   const [mousePos, setMousePos] = useState({ x: 0, y: 0 });
+  const [editableContent, setEditableContent] = useState(null);
+
+  useEffect(() => {
+    const homePageData = getItem('homePage', 'index');
+    const templeInfoData = getItem('templeInfo', 'index');
+    setEditableContent({
+      homePage: homePageData,
+      templeInfo: templeInfoData,
+    });
+  }, []);
 
   useEffect(() => {
     const handleMouseMove = (e) => {
@@ -57,7 +68,7 @@ export default function HeroSection({
         <div className="inline-flex items-center gap-2.5 px-5 py-2 rounded-full bg-navy-950/75 border border-gold-400/40 backdrop-blur-xl shadow-[0_0_25px_rgba(212,175,55,0.2)]">
           <Sparkles className="w-3.5 h-3.5 text-gold-400 animate-spin-slow" />
           <span className="font-sanskrit text-xs sm:text-sm text-gold-200 tracking-wider">
-            {templeInfo.mantra}
+            {editableContent?.templeInfo?.mantra || templeInfo.mantra}
           </span>
           <Sparkles className="w-3.5 h-3.5 text-gold-400 animate-spin-slow" />
         </div>
@@ -79,25 +90,25 @@ export default function HeroSection({
             transition={{ repeat: Infinity, duration: 4, ease: "easeInOut" }}
             className="font-sanskrit text-2xl sm:text-4xl md:text-5xl text-gold-300 drop-shadow-[0_4px_20px_rgba(212,175,55,0.6)] mb-3 tracking-wide"
           >
-            {templeInfo.hindiName}
+            {editableContent?.templeInfo?.hindiName || templeInfo.hindiName}
           </motion.h2>
 
           {/* Hollywood-level Cinematic English Title */}
           <h1 className="font-cinzel text-4xl sm:text-6xl md:text-7xl lg:text-8xl font-black tracking-[0.06em] uppercase text-gold-gradient drop-shadow-[0_8px_32px_rgba(0,0,0,0.9)] leading-[1.05]">
-            SHREE BABA SIDHNATH
+            {editableContent?.homePage?.heroTitle || "SHREE BABA SIDHNATH"}
           </h1>
 
           {/* Subtitle with Ornate Filigree Lines */}
           <div className="flex items-center justify-center gap-4 my-3 sm:my-4">
             <div className="h-[1.5px] w-14 sm:w-32 bg-gradient-to-r from-transparent via-gold-400 to-gold-400 shadow-[0_0_8px_#FFD700]" />
             <span className="font-marcellus text-sm sm:text-xl tracking-[0.35em] uppercase text-sacred-ivory font-semibold drop-shadow-md">
-              Ashram Jhadheena
+              {editableContent?.homePage?.heroSubtitle || "Ashram Jhadheena"}
             </span>
             <div className="h-[1.5px] w-14 sm:w-32 bg-gradient-to-l from-transparent via-gold-400 to-gold-400 shadow-[0_0_8px_#FFD700]" />
           </div>
 
           <p className="font-marcellus text-xs sm:text-base text-sacred-ivory/85 max-w-2xl mx-auto italic drop-shadow-lg px-4 leading-relaxed">
-            "Enter through the ancient Royal Navy & Gold Arch into centuries of unbroken Siddha meditation, sacred banyan shade, and divine silence."
+            "{editableContent?.homePage?.heroDescription || "Enter through the ancient Royal Navy & Gold Arch into centuries of unbroken Siddha meditation, sacred banyan shade, and divine silence."}"
           </p>
         </motion.div>
 
@@ -117,7 +128,7 @@ export default function HeroSection({
               {/* Liquid gold shimmer highlight */}
               <div className="absolute inset-0 bg-white/30 translate-x-[-120%] group-hover:translate-x-[120%] transition-transform duration-1000 ease-in-out" />
               <Play className="w-4 h-4 fill-navy-950" />
-              <span>ENTER SACRED TEMPLE (महाप्रवेश)</span>
+              <span>{editableContent?.homePage?.buttonText || "ENTER SACRED TEMPLE (महाप्रवेश)"}</span>
             </button>
           )}
 

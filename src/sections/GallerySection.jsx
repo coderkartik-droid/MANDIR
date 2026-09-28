@@ -1,12 +1,29 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Sparkles, Maximize2, X, Eye, Layers } from 'lucide-react';
-import { galleryItems } from '../data/templeData';
+import { galleryItems as defaultGalleryItems } from '../data/templeData';
+import { getList } from '../utils/contentLoader';
 import { soundEngine } from '../utils/audioEngine';
+import LazyImage from '../components/LazyImage';
 
 export default function GallerySection() {
   const [selectedImage, setSelectedImage] = useState(null);
   const [filter, setFilter] = useState('All');
+  const [galleryItems, setGalleryItems] = useState(defaultGalleryItems);
+
+  useEffect(() => {
+    const cmsGallery = getList('gallery');
+    if (cmsGallery.length > 0) {
+      // Ensure every item has a numeric id (use order as fallback)
+      setGalleryItems(
+        cmsGallery.map((item, idx) => ({
+          ...item,
+          id: item.id ?? item.order ?? idx + 1,
+          highlights: Array.isArray(item.highlights) ? item.highlights : [],
+        }))
+      );
+    }
+  }, []);
 
   const categories = ['All', 'Architecture', 'Sacred Nature', 'Heritage'];
 
@@ -74,10 +91,12 @@ export default function GallerySection() {
                     soundEngine.ringTempleBell(0.4, 1.15);
                   }}
                 >
-                  <img
+                  <LazyImage
                     src={item.src}
                     alt={item.title}
+                    aspectRatio={item.aspect}
                     className="w-full h-full object-cover object-center group-hover:scale-110 transition-transform duration-700 ease-out filter brightness-95 group-hover:brightness-105"
+                    style={{ position: 'absolute', inset: 0, width: '100%', height: '100%' }}
                   />
 
                   {/* Gradient Overlay */}
@@ -156,9 +175,10 @@ export default function GallerySection() {
                 className="relative max-w-5xl max-h-[85vh] w-full flex flex-col items-center"
               >
                 <div className="relative rounded-2xl overflow-hidden border border-gold-500/50 shadow-[0_0_60px_rgba(212,175,55,0.3)] max-h-[70vh]">
-                  <img
+                  <LazyImage
                     src={selectedImage.src}
                     alt={selectedImage.title}
+                    priority
                     className="w-full h-full object-contain max-h-[70vh]"
                   />
                 </div>
