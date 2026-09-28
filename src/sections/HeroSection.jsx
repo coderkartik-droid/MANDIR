@@ -1,8 +1,9 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useSyncExternalStore } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Bell, Sparkles, Volume2, CloudRain, ArrowDown, Compass, Play } from 'lucide-react';
 import { templeInfo } from '../data/templeData';
 import { getItem } from '../utils/contentLoader';
+import { subscribe as subscribeToContent, getVersion as getContentVersion } from '../utils/contentStore';
 
 export default function HeroSection({
   onRingBell,
@@ -18,6 +19,7 @@ export default function HeroSection({
   const [showBlessing, setShowBlessing] = useState(false);
   const [mousePos, setMousePos] = useState({ x: 0, y: 0 });
   const [editableContent, setEditableContent] = useState(null);
+  const contentVersion = useSyncExternalStore(subscribeToContent, getContentVersion);
 
   useEffect(() => {
     const homePageData = getItem('homePage', 'index');
@@ -26,7 +28,7 @@ export default function HeroSection({
       homePage: homePageData,
       templeInfo: templeInfoData,
     });
-  }, []);
+  }, [contentVersion]);
 
   useEffect(() => {
     const handleMouseMove = (e) => {

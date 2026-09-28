@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, useSyncExternalStore } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
   Play,
@@ -16,10 +16,11 @@ import {
   ListMusic,
   Sparkles,
 } from 'lucide-react';
-import { devotionalPlaylist } from '../data/playlistData';
+import { devotionalPlaylist, buildPlaylist } from '../data/playlistData';
 import { soundEngine } from '../utils/audioEngine';
 import { prefetchMetadata } from '../utils/mediaMetadata';
 import { formatDuration } from '../utils/mediaUtils';
+import { subscribe as subscribeToContent, getVersion as getContentVersion } from '../utils/contentStore';
 
 export default function AudioPlayer({ isEntering = false }) {
   const [currentTrackIndex, setCurrentTrackIndex] = useState(0);
@@ -37,8 +38,25 @@ export default function AudioPlayer({ isEntering = false }) {
   // duration/fileSize/bitrate/format filled in lazily on first expand.
   const [enrichedPlaylist, setEnrichedPlaylist] = useState(devotionalPlaylist);
   const metadataFetchedRef = useRef(false);
+  const contentVersion = useSyncExternalStore(subscribeToContent, getContentVersion);
 
   const currentTrack = enrichedPlaylist[currentTrackIndex] || enrichedPlaylist[0];
+
+  // Rebuild the playlist from the content store whenever the admin saves,
+  // re-fetching metadata only if it was already loaded once.
+  useEffect(() => {
+    const base = buildPlaylist();
+    setCurrentTrackIndex((i) => Math.min(i, Math.max(base.length - 1, 0)));
+    if (!metadataFetchedRef.current) {
+      setEnrichedPlaylist(base);
+      return;
+    }
+    prefetchMetadata(base, 'audio', 2).then((enriched) => {
+      setEnrichedPlaylist(enriched);
+    }).catch(() => {
+      setEnrichedPlaylist(base);
+    });
+  }, [contentVersion]);
 
   // ── Lazy metadata enrichment ─────────────────────────────────────────────
   // Runs once, only when the player is first expanded, so it never blocks
@@ -47,7 +65,7 @@ export default function AudioPlayer({ isEntering = false }) {
     if (!isExpanded || metadataFetchedRef.current) return;
     metadataFetchedRef.current = true;
 
-    prefetchMetadata(devotionalPlaylist, 'audio', 2).then((enriched) => {
+    prefetchMetadata(buildPlaylist(), 'audio', 2).then((enriched) => {
       setEnrichedPlaylist(enriched);
     }).catch(() => {
       // Metadata fetch failed — keep static data unchanged

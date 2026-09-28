@@ -1,15 +1,14 @@
-import React, { useState, useRef, useEffect } from 'react';
+import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
   Landmark, Home, BookOpen, Sparkles, Image, Video, Music, MapPin,
-  Phone, Share2, ImagePlus, Palette, Wand2, X, Upload, Download,
-  LogOut, Circle, Plus, Trash2, Eye, EyeOff, Save, RotateCcw,
+  Phone, Share2, ImagePlus, Palette, Wand2, X,
+  LogOut, Circle, Plus, Trash2, Save,
   Check, AlertCircle, GripVertical, ChevronDown, ChevronUp, Grid3x3,
   Link, Clock, User, Mail, Globe, Map as MapIcon, Compass, Car,
   Train, Plane, ShieldCheck
 } from 'lucide-react';
 import MediaUpload from './MediaUpload';
-import { exportContentToZip, importContentFromZip } from './zipUtils';
 import { useAdmin } from './AdminContext';
 
 const SIDEBAR_SECTIONS = [
@@ -436,9 +435,9 @@ function GalleryEditor() {
                   category="Gallery Image"
                   accept="image/*"
                   currentValue={g.src}
-                  onUpload={(name, dataUrl) => { admin.updateMedia(name, dataUrl); updateItem(g.id, { src: name }); }}
+                  onUpload={(path) => updateItem(g.id, { src: path })}
                   onRemove={() => updateItem(g.id, { src: '' })}
-                  onReplace={(name, dataUrl) => { admin.updateMedia(name, dataUrl); updateItem(g.id, { src: name }); }}
+                  onReplace={(path) => updateItem(g.id, { src: path })}
                 />
               </div>
               <div><FieldLabel>Title</FieldLabel><TextInput value={g.title} onChange={(v) => updateItem(g.id, { title: v })} placeholder="The Royal Archway" /></div>
@@ -526,9 +525,9 @@ function VideosEditor() {
                   category="Video Thumbnail"
                   accept="image/*"
                   currentValue={v.thumbnail}
-                  onUpload={(name, dataUrl) => { admin.updateMedia(name, dataUrl); updateItem(idx, { thumbnail: name }); }}
+                  onUpload={(path) => updateItem(idx, { thumbnail: path })}
                   onRemove={() => updateItem(idx, { thumbnail: '' })}
-                  onReplace={(name, dataUrl) => { admin.updateMedia(name, dataUrl); updateItem(idx, { thumbnail: name }); }}
+                  onReplace={(path) => updateItem(idx, { thumbnail: path })}
                 />
               </div>
               <div><FieldLabel>Duration</FieldLabel><TextInput value={v.duration} onChange={(val) => updateItem(idx, { duration: val })} placeholder="12:34" /></div>
@@ -597,9 +596,9 @@ function MusicEditor() {
                   category="Music Track"
                   accept=".mp3,audio/*"
                   currentValue={m.src}
-                  onUpload={(name, dataUrl) => { admin.updateMedia(name, dataUrl); updateItem(m.id, { src: name }); }}
+                  onUpload={(path) => updateItem(m.id, { src: path })}
                   onRemove={() => updateItem(m.id, { src: '' })}
-                  onReplace={(name, dataUrl) => { admin.updateMedia(name, dataUrl); updateItem(m.id, { src: name }); }}
+                  onReplace={(path) => updateItem(m.id, { src: path })}
                 />
               </div>
               <div><FieldLabel>Track Title</FieldLabel><TextInput value={m.title} onChange={(v) => updateItem(m.id, { title: v })} placeholder="Bansuri Morning Meditation" /></div>
@@ -820,25 +819,25 @@ function ImagesEditor() {
           category="Hero Image"
           accept="image/*"
           currentValue={img.heroImage}
-          onUpload={(name, dataUrl) => { admin.updateMedia(name, dataUrl); update('heroImage', name); }}
+          onUpload={(path) => update('heroImage', path)}
           onRemove={() => update('heroImage', '')}
-          onReplace={(name, dataUrl) => { admin.updateMedia(name, dataUrl); update('heroImage', name); }}
+          onReplace={(path) => update('heroImage', path)}
         />
         <MediaUpload
           category="Background Image"
           accept="image/*"
           currentValue={img.backgroundImage}
-          onUpload={(name, dataUrl) => { admin.updateMedia(name, dataUrl); update('backgroundImage', name); }}
+          onUpload={(path) => update('backgroundImage', path)}
           onRemove={() => update('backgroundImage', '')}
-          onReplace={(name, dataUrl) => { admin.updateMedia(name, dataUrl); update('backgroundImage', name); }}
+          onReplace={(path) => update('backgroundImage', path)}
         />
         <MediaUpload
           category="Logo / Icon"
           accept="image/*"
           currentValue={img.logo}
-          onUpload={(name, dataUrl) => { admin.updateMedia(name, dataUrl); update('logo', name); }}
+          onUpload={(path) => update('logo', path)}
           onRemove={() => update('logo', '')}
-          onReplace={(name, dataUrl) => { admin.updateMedia(name, dataUrl); update('logo', name); }}
+          onReplace={(path) => update('logo', path)}
         />
       </div>
 
@@ -867,9 +866,9 @@ function ImagesEditor() {
                 category={`Temple Image ${idx + 1}`}
                 accept="image/*"
                 currentValue={src}
-                onUpload={(name, dataUrl) => { admin.updateMedia(name, dataUrl); updateTempleImg(idx, name); }}
+                onUpload={(path) => updateTempleImg(idx, path)}
                 onRemove={() => updateTempleImg(idx, '')}
-                onReplace={(name, dataUrl) => { admin.updateMedia(name, dataUrl); updateTempleImg(idx, name); }}
+                onReplace={(path) => updateTempleImg(idx, path)}
               />
             </div>
           ))}
@@ -901,9 +900,9 @@ function ImagesEditor() {
                 category={`Festival Image ${idx + 1}`}
                 accept="image/*"
                 currentValue={src}
-                onUpload={(name, dataUrl) => { admin.updateMedia(name, dataUrl); updateFestivalImg(idx, name); }}
+                onUpload={(path) => updateFestivalImg(idx, path)}
                 onRemove={() => updateFestivalImg(idx, '')}
-                onReplace={(name, dataUrl) => { admin.updateMedia(name, dataUrl); updateFestivalImg(idx, name); }}
+                onReplace={(path) => updateFestivalImg(idx, path)}
               />
             </div>
           ))}
@@ -981,9 +980,8 @@ function AnimationEditor() {
 export default function AdminDashboard({ isOpen, onClose }) {
   const admin = useAdmin();
   const [activeSection, setActiveSection] = useState('temple');
-  const importRef = useRef(null);
   const [isProcessing, setIsProcessing] = useState(false);
-  const [processMessage, setProcessMessage] = useState('');
+  const [successMessage, setSuccessMessage] = useState('');
   const [processError, setProcessError] = useState('');
 
   useEffect(() => {
@@ -995,41 +993,21 @@ export default function AdminDashboard({ isOpen, onClose }) {
 
   if (!isOpen) return null;
 
-  const handleImportClick = () => {
-    if (importRef.current) importRef.current.click();
+  const showSuccess = (message) => {
+    setSuccessMessage(message);
+    setTimeout(() => setSuccessMessage(''), 3000);
   };
 
-  const handleImportFile = async (e) => {
-    const file = e.target.files && e.target.files[0];
-    if (!file) return;
+  const handleSave = async () => {
     setIsProcessing(true);
-    setProcessMessage('Importing content from ZIP...');
     setProcessError('');
-    try {
-      const { content, media } = await importContentFromZip(file);
-      admin.importContent(content, media);
-      setProcessMessage('✓ Content imported successfully!');
-      setTimeout(() => { setProcessMessage(''); setIsProcessing(false); }, 2500);
-    } catch (err) {
-      setProcessError('Failed to import: ' + (err.message || 'Unknown error'));
-      setIsProcessing(false);
-    }
-    if (importRef.current) importRef.current.value = '';
-  };
-
-  const handleExport = async () => {
-    setIsProcessing(true);
-    setProcessMessage('Exporting content to ZIP...');
-    setProcessError('');
-    try {
-      const exportData = admin.getExportContent();
-      await exportContentToZip(exportData.content, exportData.media);
-      admin.markAsSaved();
-      setProcessMessage('✓ Content exported & marked as saved!');
-      setTimeout(() => { setProcessMessage(''); setIsProcessing(false); }, 2500);
-    } catch (err) {
-      setProcessError('Failed to export: ' + (err.message || 'Unknown error'));
-      setIsProcessing(false);
+    setSuccessMessage('');
+    const result = await admin.saveAll();
+    setIsProcessing(false);
+    if (result.success) {
+      showSuccess(`✓ Saved successfully! ${result.saved} section${result.saved === 1 ? '' : 's'} updated on the server.`);
+    } else {
+      setProcessError('Failed to save: ' + (result.error || 'Unknown error'));
     }
   };
 
@@ -1098,22 +1076,25 @@ export default function AdminDashboard({ isOpen, onClose }) {
 
               <div className="flex items-center gap-3 flex-wrap">
                 <button
-                  onClick={handleImportClick}
-                  disabled={isProcessing}
-                  className="flex items-center gap-2 px-4 py-2.5 rounded-xl bg-navy-900/80 hover:bg-navy-800 border border-gold-500/30 hover:border-gold-400 text-gold-300 hover:text-gold-200 transition-all font-cinzel text-xs tracking-wider disabled:opacity-50 group"
+                  onClick={handleSave}
+                  disabled={isProcessing || !admin.hasUnsavedChanges}
+                  className="flex items-center gap-2 px-5 py-2.5 rounded-xl bg-gradient-to-r from-gold-200 via-gold-400 to-gold-600 text-navy-950 font-cinzel text-xs font-bold tracking-wider uppercase shadow-[0_0_20px_rgba(212,175,55,0.35)] hover:shadow-[0_0_30px_rgba(255,215,0,0.5)] hover:scale-[1.02] active:scale-[0.98] transition-all disabled:opacity-40 disabled:cursor-not-allowed disabled:hover:scale-100 group"
                 >
-                  <Upload className="w-4 h-4 group-hover:-translate-y-0.5 transition-transform" />
-                  Import Content
-                </button>
-                <input ref={importRef} type="file" accept=".zip" onChange={handleImportFile} className="hidden" />
-
-                <button
-                  onClick={handleExport}
-                  disabled={isProcessing}
-                  className="flex items-center gap-2 px-4 py-2.5 rounded-xl bg-gradient-to-r from-gold-500/20 to-sacred-saffron/20 hover:from-gold-500/30 hover:to-sacred-saffron/30 border border-gold-500/40 hover:border-gold-400 text-gold-300 hover:text-gold-200 transition-all font-cinzel text-xs tracking-wider disabled:opacity-50 group"
-                >
-                  <Download className="w-4 h-4 group-hover:translate-y-0.5 transition-transform" />
-                  Export Content ZIP
+                  {isProcessing ? (
+                    <>
+                      <motion.div
+                        animate={{ rotate: 360 }}
+                        transition={{ duration: 1, repeat: Infinity, ease: 'linear' }}
+                        className="w-4 h-4 border-2 border-navy-950/30 border-t-navy-950 rounded-full"
+                      />
+                      Saving...
+                    </>
+                  ) : (
+                    <>
+                      <Save className="w-4 h-4 group-hover:translate-y-0.5 transition-transform" />
+                      Save Changes
+                    </>
+                  )}
                 </button>
 
                 {admin.hasUnsavedChanges ? (
@@ -1138,12 +1119,16 @@ export default function AdminDashboard({ isOpen, onClose }) {
               </div>
             </div>
 
-            {processMessage && (
+            {successMessage && (
               <div className="px-6 pb-3">
-                <div className="flex items-start gap-3 px-4 py-3 rounded-xl bg-gold-500/10 border border-gold-500/30">
-                  <Check className="w-4 h-4 text-gold-400 shrink-0 mt-0.5" />
-                  <p className="font-marcellus text-sm text-gold-300">{processMessage}</p>
-                </div>
+                <motion.div
+                  initial={{ opacity: 0, y: -8 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  className="flex items-start gap-3 px-4 py-3 rounded-xl bg-emerald-950/50 border border-emerald-500/40 shadow-[0_0_20px_rgba(16,185,129,0.15)]"
+                >
+                  <Check className="w-4 h-4 text-emerald-400 shrink-0 mt-0.5" />
+                  <p className="font-marcellus text-sm text-emerald-300">{successMessage}</p>
+                </motion.div>
               </div>
             )}
             {processError && (

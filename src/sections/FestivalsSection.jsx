@@ -1,13 +1,15 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useSyncExternalStore } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Calendar, Sparkles, ChevronRight, Moon, Flame, Heart, Shield } from 'lucide-react';
 import { festivalList } from '../data/templeData';
 import { getList } from '../utils/contentLoader';
+import { subscribe as subscribeToContent, getVersion as getContentVersion } from '../utils/contentStore';
 import { soundEngine } from '../utils/audioEngine';
 
 export default function FestivalsSection() {
   const [festivals, setFestivals] = useState(festivalList);
   const [selectedFestival, setSelectedFestival] = useState(festivalList[0]);
+  const contentVersion = useSyncExternalStore(subscribeToContent, getContentVersion);
 
   useEffect(() => {
     const cmsFestivals = getList('festivals');
@@ -21,7 +23,7 @@ export default function FestivalsSection() {
       setFestivals(normalised);
       setSelectedFestival(normalised[0]);
     }
-  }, []);
+  }, [contentVersion]);
 
   return (
     <section id="festivals" className="relative py-36 sm:py-44 px-4 sm:px-6 lg:px-8 z-10">

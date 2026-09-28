@@ -22,3 +22,12 @@ dist-ssr
 *.njsproj
 *.sln
 *.sw?
+
+# Python backend
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+
+# Temp files from atomic JSON writes
+backend/content/*.tmp

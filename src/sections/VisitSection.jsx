@@ -1,18 +1,20 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useSyncExternalStore } from 'react';
 import { motion } from 'framer-motion';
 import { MapPin, Clock, Compass, Car, Train, Plane, Phone, Mail, Navigation, ShieldCheck } from 'lucide-react';
 import { templeSchedule, visitGuidelines } from '../data/templeData';
 import { getItem } from '../utils/contentLoader';
+import { subscribe as subscribeToContent, getVersion as getContentVersion } from '../utils/contentStore';
 
 export default function VisitSection() {
   const [contactInfo, setContactInfo] = useState(visitGuidelines);
+  const contentVersion = useSyncExternalStore(subscribeToContent, getContentVersion);
 
   useEffect(() => {
     const cmsContactInfo = getItem('contactInfo', 'index');
     if (cmsContactInfo && Object.keys(cmsContactInfo).length > 0) {
       setContactInfo((prev) => ({ ...prev, ...cmsContactInfo }));
     }
-  }, []);
+  }, [contentVersion]);
 
   const nearbyAttractions = [
     {

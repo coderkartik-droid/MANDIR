@@ -94,7 +94,7 @@ const DEFAULT_PLAYLIST = [
 ];
 
 // ─── Load from CMS, fall back to defaults ────────────────────────────────────
-function buildPlaylist() {
+export function buildPlaylist() {
   try {
     const cmsTracks = getList('musicPlaylist');
     if (cmsTracks.length > 0) {

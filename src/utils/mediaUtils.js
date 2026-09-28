@@ -15,7 +15,7 @@
  */
 
 // ─── Canonical folder constants ───────────────────────────────────────────────
-// These must stay in sync with the media export paths in src/admin/zipUtils.js.
+// These must stay in sync with the media folders served by the FastAPI backend.
 
 export const MEDIA_PATHS = {
   gallery:     '/media/images/gallery',

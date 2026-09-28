@@ -1,23 +1,23 @@
-import React, { useState, useCallback, useEffect, useRef } from 'react';
+import React, { useState, useCallback, useRef } from 'react';
 import { Upload, Image, Music, Video, X, Trash2 } from 'lucide-react';
 import { useAdmin } from './AdminContext';
 
 const formatFileSize = (bytes) => {
-  if (bytes === 0 || !bytes) return '0 B';
+  if (bytes === 0 || !bytes) return '';
   const k = 1024;
   const sizes = ['B', 'KB', 'MB', 'GB'];
   const i = Math.floor(Math.log(bytes) / Math.log(k));
   return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
 };
 
-const detectMediaType = (fileName, dataUrl) => {
-  const name = (fileName || '').toLowerCase();
-  const url = (dataUrl || '').toLowerCase();
-  if (name.endsWith('.mp3') || url.includes('audio/mpeg') || url.includes('audio/mp3')) {
-    return 'audio';
-  }
-  if (name.endsWith('.mp4') || url.includes('video/mp4')) {
-    return 'video';
+const detectMediaType = (value, acceptHint = '') => {
+  const v = (value || '').toLowerCase();
+  const hint = (acceptHint || '').toLowerCase();
+  if (v.endsWith('.mp3') || v.includes('/audio/')) return 'audio';
+  if (v.endsWith('.mp4') || v.includes('/video/')) return 'video';
+  if (!v) {
+    if (hint.includes('audio') || hint.includes('.mp3')) return 'audio';
+    if (hint.includes('video') || hint.includes('.mp4')) return 'video';
   }
   return 'image';
 };
@@ -25,8 +25,8 @@ const detectMediaType = (fileName, dataUrl) => {
 const validateAccept = (file, acceptStr) => {
   if (!acceptStr) return true;
   const acceptItems = acceptStr.split(',').map((s) => s.trim().toLowerCase());
-  const fileType = file.type.toLowerCase();
-  const fileName = file.name.toLowerCase();
+  const fileType = (file.type || '').toLowerCase();
+  const fileName = (file.name || '').toLowerCase();
   return acceptItems.some((item) => {
     if (item.endsWith('/*')) {
       const prefix = item.slice(0, -2);
@@ -39,6 +39,11 @@ const validateAccept = (file, acceptStr) => {
   });
 };
 
+/**
+ * MediaUpload — uploads a file straight to the FastAPI backend and stores the
+ * returned relative path (e.g. "/api/media/images/1699_photo.jpg") in JSON.
+ * No data URLs, no ZIP export, no client-side blob storage.
+ */
 export default function MediaUpload({
   category = 'Upload',
   accept = 'image/*,.mp3,.mp4',
@@ -47,43 +52,20 @@ export default function MediaUpload({
   onRemove,
   onReplace,
 }) {
-  const { uploadedFiles } = useAdmin();
+  const admin = useAdmin();
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState('');
   const [isDragging, setIsDragging] = useState(false);
-  const [previewUrl, setPreviewUrl] = useState('');
-  const [fileName, setFileName] = useState('');
-  const [fileSize, setFileSize] = useState(0);
+  const [lastSize, setLastSize] = useState(0);
   const inputRef = useRef(null);
   const replaceInputRef = useRef(null);
 
-  const resolvePreview = useCallback(() => {
-    if (previewUrl) return previewUrl;
-    if (currentValue && currentValue.startsWith('data:')) return currentValue;
-    if (currentValue && uploadedFiles[currentValue]) return uploadedFiles[currentValue];
-    return currentValue || '';
-  }, [previewUrl, currentValue, uploadedFiles]);
+  const hasFile = !!currentValue;
+  const mediaType = detectMediaType(currentValue, accept);
+  const baseName = currentValue ? currentValue.split('/').pop() : '';
 
-  useEffect(() => {
-    if (!previewUrl && currentValue && !currentValue.startsWith('data:')) {
-      const match = Object.entries(uploadedFiles).find(([key]) => key === currentValue);
-      if (match) {
-        setFileName(match[0]);
-      }
-    }
-  }, [currentValue, uploadedFiles, previewUrl]);
-
-  const readFileAsDataUrl = useCallback((file) => {
-    return new Promise((resolve, reject) => {
-      const reader = new FileReader();
-      reader.onload = () => resolve(reader.result);
-      reader.onerror = () => reject(new Error('Failed to read file'));
-      reader.readAsDataURL(file);
-    });
-  }, []);
-
-  const handleFileSelect = useCallback(
-    async (file, isReplace = false) => {
+  const uploadFile = useCallback(
+    async (file, isReplace) => {
       setError('');
       if (!file) return;
       if (!validateAccept(file, accept)) {
@@ -92,49 +74,57 @@ export default function MediaUpload({
       }
       setIsLoading(true);
       try {
-        const dataUrl = await readFileAsDataUrl(file);
-        setPreviewUrl(dataUrl);
-        setFileName(file.name);
-        setFileSize(file.size);
-        if (isReplace && onReplace) {
-          onReplace(file.name, dataUrl);
+        const info = await admin.uploadMedia(file);
+        setLastSize(info.size || 0);
+        const storedPath = info.url;
+        if (isReplace) {
+          if (currentValue && currentValue !== storedPath) {
+            admin.deleteMedia(currentValue).catch(() => {});
+          }
+          if (onReplace) onReplace(storedPath);
+          else if (onUpload) onUpload(storedPath);
         } else if (onUpload) {
-          onUpload(file.name, dataUrl);
+          onUpload(storedPath);
         }
       } catch (err) {
-        setError(err.message || 'Failed to process file');
+        setError(err.message || 'Upload failed');
       } finally {
         setIsLoading(false);
       }
     },
-    [accept, onUpload, onReplace, readFileAsDataUrl]
+    [accept, admin, currentValue, onUpload, onReplace]
   );
 
   const handleInputChange = useCallback(
     (e) => {
       const file = e.target.files && e.target.files[0];
-      handleFileSelect(file, false);
+      uploadFile(file, false);
       if (inputRef.current) inputRef.current.value = '';
     },
-    [handleFileSelect]
+    [uploadFile]
   );
 
   const handleReplaceChange = useCallback(
     (e) => {
       const file = e.target.files && e.target.files[0];
-      handleFileSelect(file, true);
+      uploadFile(file, true);
       if (replaceInputRef.current) replaceInputRef.current.value = '';
     },
-    [handleFileSelect]
+    [uploadFile]
   );
 
-  const handleRemove = useCallback(() => {
-    setPreviewUrl('');
-    setFileName('');
-    setFileSize(0);
+  const handleRemove = useCallback(async () => {
     setError('');
+    if (currentValue) {
+      try {
+        await admin.deleteMedia(currentValue);
+      } catch {
+        /* field is cleared regardless */
+      }
+    }
+    setLastSize(0);
     if (onRemove) onRemove();
-  }, [onRemove]);
+  }, [admin, currentValue, onRemove]);
 
   const handleDragOver = useCallback((e) => {
     e.preventDefault();
@@ -154,15 +144,10 @@ export default function MediaUpload({
       e.stopPropagation();
       setIsDragging(false);
       const file = e.dataTransfer.files && e.dataTransfer.files[0];
-      const hasExisting = !!(previewUrl || currentValue);
-      handleFileSelect(file, hasExisting);
+      uploadFile(file, hasFile);
     },
-    [handleFileSelect, previewUrl, currentValue]
+    [uploadFile, hasFile]
   );
-
-  const activePreview = resolvePreview();
-  const mediaType = detectMediaType(fileName || currentValue || '', activePreview);
-  const hasFile = !!(activePreview || currentValue);
 
   const MediaIcon = mediaType === 'audio' ? Music : mediaType === 'video' ? Video : Image;
 
@@ -172,10 +157,10 @@ export default function MediaUpload({
         <label className="font-cinzel text-sm font-semibold text-gold-300 tracking-wider">
           {category}
         </label>
-        {fileName && (
+        {baseName && (
           <span className="font-marcellus text-[10px] text-sacred-ivory/50 truncate max-w-[60%] text-right">
-            {fileName}
-            {fileSize ? ` • ${formatFileSize(fileSize)}` : ''}
+            {baseName}
+            {lastSize ? ` • ${formatFileSize(lastSize)}` : ''}
           </span>
         )}
       </div>
@@ -205,17 +190,17 @@ export default function MediaUpload({
                     <div className="flex flex-col items-center gap-3">
                       <div className="w-10 h-10 border-2 border-gold-400/30 border-t-gold-400 rounded-full animate-spin" />
                       <span className="font-cinzel text-xs text-gold-300 tracking-wider">
-                        PROCESSING...
+                        UPLOADING...
                       </span>
                     </div>
                   </div>
                 )}
 
-                {mediaType === 'image' && activePreview && (
+                {mediaType === 'image' && (
                   <div className="flex items-center justify-center bg-navy-950 min-h-[180px] max-h-[280px]">
                     <img
-                      src={activePreview}
-                      alt={fileName || category}
+                      src={currentValue}
+                      alt={baseName || category}
                       className="w-full h-full object-contain max-h-[280px]"
                     />
                   </div>
@@ -226,29 +211,17 @@ export default function MediaUpload({
                     <div className="w-16 h-16 rounded-full bg-gradient-to-br from-gold-500/20 to-navy-900 border border-gold-400/40 flex items-center justify-center shadow-[0_0_20px_rgba(212,175,55,0.25)]">
                       <Music className="w-7 h-7 text-gold-400" />
                     </div>
-                    {activePreview && (
-                      <audio
-                        controls
-                        src={activePreview}
-                        className="w-full max-w-md h-10"
-                      />
-                    )}
+                    <audio controls src={currentValue} className="w-full max-w-md h-10" />
                   </div>
                 )}
 
                 {mediaType === 'video' && (
                   <div className="p-4 flex flex-col items-center gap-4 bg-navy-950 min-h-[180px]">
-                    {activePreview ? (
-                      <video
-                        controls
-                        src={activePreview}
-                        className="w-full max-h-[260px] rounded-lg bg-black"
-                      />
-                    ) : (
-                      <div className="w-16 h-16 rounded-full bg-gradient-to-br from-gold-500/20 to-navy-900 border border-gold-400/40 flex items-center justify-center shadow-[0_0_20px_rgba(212,175,55,0.25)]">
-                        <Video className="w-7 h-7 text-gold-400" />
-                      </div>
-                    )}
+                    <video
+                      controls
+                      src={currentValue}
+                      className="w-full max-h-[260px] rounded-lg bg-black"
+                    />
                   </div>
                 )}
               </div>
@@ -263,11 +236,13 @@ export default function MediaUpload({
                     accept={accept}
                     onChange={handleReplaceChange}
                     className="hidden"
+                    disabled={isLoading}
                   />
                 </label>
                 <button
                   onClick={handleRemove}
-                  className="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-red-950/40 hover:bg-red-900/60 border border-red-500/30 hover:border-red-500/50 text-red-300 hover:text-red-200 transition-all font-cinzel text-xs tracking-wider group"
+                  disabled={isLoading}
+                  className="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-red-950/40 hover:bg-red-900/60 border border-red-500/30 hover:border-red-500/50 text-red-300 hover:text-red-200 transition-all font-cinzel text-xs tracking-wider group disabled:opacity-50"
                 >
                   <Trash2 className="w-3.5 h-3.5 group-hover:scale-110 transition-transform" />
                   REMOVE
@@ -288,7 +263,7 @@ export default function MediaUpload({
                     <div className="flex flex-col items-center gap-3">
                       <div className="w-12 h-12 border-2 border-gold-400/30 border-t-gold-400 rounded-full animate-spin" />
                       <span className="font-cinzel text-xs text-gold-300 tracking-wider">
-                        READING FILE...
+                        UPLOADING...
                       </span>
                     </div>
                   ) : (
@@ -296,7 +271,7 @@ export default function MediaUpload({
                       <div className="relative">
                         <div className="w-20 h-20 rounded-2xl bg-gradient-to-br from-navy-900 via-navy-850 to-navy-900 border border-gold-500/30 flex items-center justify-center shadow-[0_0_30px_rgba(212,175,55,0.1)]">
                           <div className="w-14 h-14 rounded-xl bg-gradient-to-br from-gold-500/15 to-navy-950 border border-gold-400/30 flex items-center justify-center">
-                            <Upload className="w-6 h-6 text-gold-400" />
+                            <MediaIcon className="w-6 h-6 text-gold-400" />
                           </div>
                         </div>
                         <div className="absolute -top-1 -right-1 flex -space-x-2">
@@ -316,7 +291,7 @@ export default function MediaUpload({
                           or drag & drop your file here
                         </p>
                         <p className="font-marcellus text-[10px] text-sacred-ivory/30 mt-2">
-                          Supports JPG, PNG, GIF, WEBP, SVG, MP3, MP4
+                          Saved on the server • JPG, PNG, WEBP, MP3, MP4
                         </p>
                       </div>
                     </>

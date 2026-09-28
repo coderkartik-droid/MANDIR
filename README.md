@@ -1,16 +1,95 @@
-# React + Vite
+# Shree Baba Sidhnath Mandir — React + FastAPI
 
-This template provides a minimal setup to get React working in Vite with HMR and some Oxlint rules.
+A cinematic 3D temple website (React 19 + Vite + Three.js) with a lightweight
+**JSON-file backend** (FastAPI). No database, no CMS, no external services —
+all content lives in editable JSON files and all media lives on the server's
+file system.
 
-Currently, two official plugins are available:
+## Architecture
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Oxc](https://oxc.rs)
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/)
+```
+├── backend/                ← FastAPI (Python)
+│   ├── main.py             ← App entry: CORS, routers, static mounts
+│   ├── requirements.txt
+│   ├── routers/
+│   │   ├── content.py      ← GET/POST /api/content
+│   │   └── media.py        ← POST /api/upload/*, DELETE /api/media
+│   ├── services/
+│   │   ├── json_service.py ← Atomic JSON read/write
+│   │   └── media_service.py← Upload/delete with type + path safety
+│   ├── content/            ← The 12 JSON content files (source of truth)
+│   └── media/              ← Uploaded files (images / audio / video)
+├── src/                    ← React frontend
+│   ├── admin/              ← Built-in Admin Panel (login + dashboard)
+│   ├── utils/api.js        ← All backend calls in one place
+│   └── utils/contentStore.js ← Loads JSON from backend at startup
+└── public/                 ← Static legacy assets (/images, /audio, /media)
+```
 
-## React Compiler
+## API
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+| Method | Endpoint                 | Purpose                          |
+|--------|--------------------------|----------------------------------|
+| GET    | `/api/health`            | Health check                     |
+| GET    | `/api/content`           | All sections                     |
+| GET    | `/api/content/{section}` | One section                      |
+| POST   | `/api/content/{section}` | Save one section                 |
+| POST   | `/api/upload/image`      | Upload image (multipart `file`)  |
+| POST   | `/api/upload/audio`      | Upload MP3                       |
+| POST   | `/api/upload/video`      | Upload MP4                       |
+| DELETE | `/api/media?path=...`    | Delete an uploaded file          |
 
-## Expanding the Oxlint configuration
+Sections: `temple`, `home`, `contact`, `festivals`, `gallery`, `videos`,
+`music`, `maps`, `social`, `images`, `theme`, `animations`.
 
-If you are developing a production application, we recommend using TypeScript with type-aware lint rules enabled. Check out the [TS template](https://github.com/vitejs/vite/tree/main/packages/create-vite/template-react-ts) for information on how to integrate TypeScript and Oxlint's TypeScript related rules in your project.
+## Local Development
+
+Run both processes:
+
+```bash
+# Terminal 1 — backend (http://localhost:8001)
+py -3.13 -m pip install -r backend/requirements.txt   # first time only
+npm run backend
+
+# Terminal 2 — frontend (http://localhost:5173, proxies /api to :8001)
+npm install
+npm run dev
+```
+
+## Admin Panel
+
+Click the ⚙️ Settings icon in the navbar.
+
+- Username: `MANDIR`
+- Password: `MANDIR123`
+
+(Client-side only — it protects the admin UI, there are no user accounts.)
+
+Edit any section, upload media, then press **Save Changes**. The backend
+writes the JSON files immediately and the website refreshes live — no page
+reload, no ZIP export, no git round-trip.
+
+## Production (Render Web Service)
+
+`render.yaml` defines a single Python web service:
+
+- **Build:** `pip install -r backend/requirements.txt && npm ci && npm run build`
+- **Start:** `uvicorn backend.main:app --host 0.0.0.0 --port $PORT`
+- **Health check:** `/api/health`
+
+In production FastAPI serves the built frontend from `dist/` on the same
+origin as the API, so no CORS configuration is needed. Environment
+variables: `PYTHON_VERSION`, `NODE_VERSION`, `ENVIRONMENT`, and optional
+`CORS_ORIGINS` (comma-separated).
+
+> ⚠ Note: Render's free-tier disk is ephemeral — content saved or media
+> uploaded on the server resets on redeploy. For permanent changes, copy the
+> updated `backend/content/*.json` and `backend/media/` files back into the
+> repo and push, or attach a persistent disk.
+
+## Production Build (frontend only)
+
+```bash
+npm run build     # outputs dist/, served by FastAPI
+npm run preview
+```

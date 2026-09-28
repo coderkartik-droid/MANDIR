@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useSyncExternalStore } from 'react';
 import Lenis from 'lenis';
 import TempleCanvas from './three/TempleCanvas';
 import Navbar from './components/Navbar';
@@ -23,8 +23,13 @@ import { Bell } from 'lucide-react';
 
 import { AdminProvider } from './admin/AdminContext';
 import AdminPanel from './admin/AdminPanel';
+import { subscribe as subscribeToContent, getVersion as getContentVersion } from './utils/contentStore';
 
 function TempleSite() {
+  // Re-renders the whole site whenever the content store reloads
+  // (e.g. right after the Admin Panel saves) — no page refresh needed.
+  useSyncExternalStore(subscribeToContent, getContentVersion);
+
   const [scrollProgress, setScrollProgress] = useState(0);
   const [timeMode, setTimeMode] = useState('evening');
   const [isRain, setIsRain] = useState(false);

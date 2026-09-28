@@ -1,81 +1,36 @@
-import templeJson from '../../content/temple.json';
-import homeJson from '../../content/home.json';
-import contactJson from '../../content/contact.json';
-import festivalsJson from '../../content/festivals.json';
-import galleryJson from '../../content/gallery.json';
-import videosJson from '../../content/videos.json';
-import musicJson from '../../content/music.json';
-import mapsJson from '../../content/maps.json';
-import socialJson from '../../content/social.json';
-import imagesJson from '../../content/images.json';
-import themeJson from '../../content/theme.json';
-import animationsJson from '../../content/animations.json';
+/**
+ * contentLoader.js — synchronous content access for site components.
+ *
+ * Data comes from the FastAPI backend via contentStore (filled at startup).
+ * The exported function signatures are unchanged, so sections keep working
+ * exactly as before — they just read live, admin-editable content now.
+ */
 
-const SINGLETON_COLLECTIONS = {
-  templeInfo: templeJson,
-  homePage: homeJson,
-  contactInfo: contactJson,
-  maps: mapsJson,
-  socialLinks: socialJson,
-  images: imagesJson,
-  themeColors: themeJson,
-  animationSettings: animationsJson,
-};
+import { getCollection, getRawSection, SECTION_TO_COLLECTION } from './contentStore';
 
-const LIST_COLLECTIONS = {
-  festivals: festivalsJson,
-  gallery: galleryJson,
-  videos: videosJson,
-  musicPlaylist: musicJson,
-};
-
-function parseSingleton(jsonData) {
-  return { index: { ...jsonData, _slug: 'index' } };
-}
-
-function parseList(jsonData) {
-  const result = {};
-  const items = jsonData.items || [];
-  items.forEach((item, idx) => {
-    const slug = item.id ? String(item.id) : `item_${idx}`;
-    result[slug] = { ...item, _slug: slug };
-  });
-  return result;
-}
-
-function parseCollection(collectionKey) {
-  if (SINGLETON_COLLECTIONS[collectionKey] !== undefined) {
-    return parseSingleton(SINGLETON_COLLECTIONS[collectionKey]);
-  }
-  if (LIST_COLLECTIONS[collectionKey] !== undefined) {
-    return parseList(LIST_COLLECTIONS[collectionKey]);
-  }
-  console.warn(`[contentLoader] Unknown collection: "${collectionKey}"`);
-  return {};
-}
+const COLLECTION_TO_SECTION = Object.fromEntries(
+  Object.entries(SECTION_TO_COLLECTION).map(([section, key]) => [key, section])
+);
 
 export function loadAllContent() {
   const result = {};
-  Object.keys(SINGLETON_COLLECTIONS).forEach((key) => {
-    result[key] = parseSingleton(SINGLETON_COLLECTIONS[key]);
-  });
-  Object.keys(LIST_COLLECTIONS).forEach((key) => {
-    result[key] = parseList(LIST_COLLECTIONS[key]);
+  Object.values(SECTION_TO_COLLECTION).forEach((collectionKey) => {
+    result[collectionKey] = getCollection(collectionKey);
   });
   return result;
 }
 
 export function getContent(collectionKey) {
-  return parseCollection(collectionKey);
+  return getCollection(collectionKey);
 }
 
 export function getItem(collectionKey, slug = 'index') {
-  const collection = getContent(collectionKey);
+  const collection = getCollection(collectionKey);
   return collection[slug] ?? {};
 }
 
 export function getList(collectionKey) {
-  const collection = getContent(collectionKey);
+  const collection = getCollection(collectionKey);
   return Object.values(collection).sort((a, b) => {
     const ao = a.order ?? Infinity;
     const bo = b.order ?? Infinity;
@@ -84,13 +39,8 @@ export function getList(collectionKey) {
 }
 
 export function getRawJson(collectionKey) {
-  if (SINGLETON_COLLECTIONS[collectionKey] !== undefined) {
-    return SINGLETON_COLLECTIONS[collectionKey];
-  }
-  if (LIST_COLLECTIONS[collectionKey] !== undefined) {
-    return LIST_COLLECTIONS[collectionKey];
-  }
-  return null;
+  const section = COLLECTION_TO_SECTION[collectionKey];
+  return section ? getRawSection(section) : null;
 }
 
 export default { loadAllContent, getContent, getItem, getList, getRawJson };

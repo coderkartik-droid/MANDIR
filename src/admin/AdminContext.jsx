@@ -1,17 +1,7 @@
-import { createContext, useContext, useState, useCallback, useMemo } from 'react';
+import { createContext, useContext, useState, useCallback, useEffect, useMemo, useRef } from 'react';
 
-import templeData from '../../content/temple.json';
-import homeData from '../../content/home.json';
-import contactData from '../../content/contact.json';
-import festivalsData from '../../content/festivals.json';
-import galleryData from '../../content/gallery.json';
-import videosData from '../../content/videos.json';
-import musicData from '../../content/music.json';
-import mapsData from '../../content/maps.json';
-import socialData from '../../content/social.json';
-import imagesData from '../../content/images.json';
-import themeData from '../../content/theme.json';
-import animationsData from '../../content/animations.json';
+import { api } from '../utils/api';
+import { getAllRaw, reload as reloadSiteContent, subscribe as subscribeToStore } from '../utils/contentStore';
 
 const deepClone = (value) => {
   if (value === null || typeof value !== 'object') {
@@ -29,31 +19,43 @@ const deepClone = (value) => {
 
 const LIST_COLLECTIONS = ['festivals', 'gallery', 'music', 'videos'];
 
-const createInitialContent = () => ({
-  temple: deepClone(templeData),
-  home: deepClone(homeData),
-  contact: deepClone(contactData),
-  festivals: deepClone(festivalsData),
-  gallery: deepClone(galleryData),
-  videos: deepClone(videosData),
-  music: deepClone(musicData),
-  maps: deepClone(mapsData),
-  social: deepClone(socialData),
-  images: deepClone(imagesData),
-  theme: deepClone(themeData),
-  animations: deepClone(animationsData),
-});
-
 const ADMIN_USERNAME = 'MANDIR';
 const ADMIN_PASSWORD = 'MANDIR123';
+
+const snapshotContent = () => deepClone(getAllRaw() || {});
+
+const detectKind = (file) => {
+  const name = (file.name || '').toLowerCase();
+  const type = (file.type || '').toLowerCase();
+  if (type.startsWith('audio/') || name.endsWith('.mp3')) return 'audio';
+  if (type.startsWith('video/') || name.endsWith('.mp4')) return 'video';
+  return 'image';
+};
 
 const AdminContext = createContext(null);
 
 export const AdminProvider = ({ children }) => {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
-  const [content, setContent] = useState(createInitialContent);
-  const [uploadedFiles, setUploadedFiles] = useState({});
-  const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false);
+  const [content, setContent] = useState(snapshotContent);
+  const [dirtySections, setDirtySections] = useState({});
+  const [isSaving, setIsSaving] = useState(false);
+
+  const contentRef = useRef(content);
+  contentRef.current = content;
+  const dirtyRef = useRef(dirtySections);
+  dirtyRef.current = dirtySections;
+
+  // Keep admin state in sync with the backend store whenever it reloads,
+  // unless there are unsaved edits in progress.
+  useEffect(() => {
+    const sync = () => {
+      if (Object.keys(dirtyRef.current).length === 0) {
+        setContent(snapshotContent());
+      }
+    };
+    sync();
+    return subscribeToStore(sync);
+  }, []);
 
   const login = useCallback((username, password) => {
     if (username === ADMIN_USERNAME && password === ADMIN_PASSWORD) {
@@ -67,18 +69,19 @@ export const AdminProvider = ({ children }) => {
     setIsAuthenticated(false);
   }, []);
 
-  const updateContent = useCallback((collectionKey, newValue) => {
+  const markDirty = useCallback((sectionKey) => {
+    setDirtySections((prev) => (prev[sectionKey] ? prev : { ...prev, [sectionKey]: true }));
+  }, []);
+
+  const updateContent = useCallback((sectionKey, newValue) => {
     setContent((prev) => {
-      if (!(collectionKey in prev)) {
+      if (!(sectionKey in prev)) {
         return prev;
       }
-      return {
-        ...prev,
-        [collectionKey]: deepClone(newValue),
-      };
+      return { ...prev, [sectionKey]: deepClone(newValue) };
     });
-    setHasUnsavedChanges(true);
-  }, []);
+    markDirty(sectionKey);
+  }, [markDirty]);
 
   const updateListItem = useCallback((collectionKey, itemId, newValue) => {
     if (!LIST_COLLECTIONS.includes(collectionKey)) {
@@ -92,16 +95,10 @@ export const AdminProvider = ({ children }) => {
       const newItems = collection.items.map((item) =>
         item.id === itemId ? deepClone(newValue) : item
       );
-      return {
-        ...prev,
-        [collectionKey]: {
-          ...collection,
-          items: newItems,
-        },
-      };
+      return { ...prev, [collectionKey]: { ...collection, items: newItems } };
     });
-    setHasUnsavedChanges(true);
-  }, []);
+    markDirty(collectionKey);
+  }, [markDirty]);
 
   const addListItem = useCallback((collectionKey, newItem) => {
     if (!LIST_COLLECTIONS.includes(collectionKey)) {
@@ -115,14 +112,11 @@ export const AdminProvider = ({ children }) => {
       const currentItems = Array.isArray(collection.items) ? collection.items : [];
       return {
         ...prev,
-        [collectionKey]: {
-          ...collection,
-          items: [...currentItems, deepClone(newItem)],
-        },
+        [collectionKey]: { ...collection, items: [...currentItems, deepClone(newItem)] },
       };
     });
-    setHasUnsavedChanges(true);
-  }, []);
+    markDirty(collectionKey);
+  }, [markDirty]);
 
   const removeListItem = useCallback((collectionKey, itemId) => {
     if (!LIST_COLLECTIONS.includes(collectionKey)) {
@@ -134,62 +128,47 @@ export const AdminProvider = ({ children }) => {
         return prev;
       }
       const newItems = collection.items.filter((item) => item.id !== itemId);
-      return {
-        ...prev,
-        [collectionKey]: {
-          ...collection,
-          items: newItems,
-        },
-      };
+      return { ...prev, [collectionKey]: { ...collection, items: newItems } };
     });
-    setHasUnsavedChanges(true);
-  }, []);
+    markDirty(collectionKey);
+  }, [markDirty]);
 
-  const updateMedia = useCallback((fileName, dataUrl) => {
-    setUploadedFiles((prev) => ({
-      ...prev,
-      [fileName]: dataUrl,
-    }));
-    setHasUnsavedChanges(true);
-  }, []);
-
-  const removeMedia = useCallback((fileName) => {
-    setUploadedFiles((prev) => {
-      const next = { ...prev };
-      delete next[fileName];
-      return next;
-    });
-    setHasUnsavedChanges(true);
-  }, []);
-
-  const markAsSaved = useCallback(() => {
-    setHasUnsavedChanges(false);
-  }, []);
-
-  const importContent = useCallback((fullContentObject, mediaObject) => {
-    if (fullContentObject && typeof fullContentObject === 'object') {
-      setContent((prev) => {
-        const next = { ...prev };
-        for (const key of Object.keys(fullContentObject)) {
-          if (key in prev) {
-            next[key] = deepClone(fullContentObject[key]);
-          }
-        }
-        return next;
-      });
+  /** Save every modified section to the backend, then refresh the live site. */
+  const saveAll = useCallback(async () => {
+    const sections = Object.keys(dirtyRef.current);
+    if (sections.length === 0) {
+      return { success: true, saved: 0 };
     }
-    if (mediaObject && typeof mediaObject === 'object') {
-      setUploadedFiles(deepClone(mediaObject));
+    setIsSaving(true);
+    try {
+      for (const section of sections) {
+        await api.saveSection(section, contentRef.current[section]);
+      }
+      setDirtySections({});
+      await reloadSiteContent();
+      return { success: true, saved: sections.length };
+    } catch (err) {
+      return { success: false, error: err.message || 'Save failed' };
+    } finally {
+      setIsSaving(false);
     }
-    setHasUnsavedChanges(true);
   }, []);
 
-  const getExportContent = useCallback(() => {
-    return {
-      content: deepClone(content),
-      media: deepClone(uploadedFiles),
-    };
-  }, [content, uploadedFiles]);
+  /** Upload a File to the backend; resolves with { name, path, url, size, kind }. */
+  const uploadMedia = useCallback(async (file) => {
+    const kind = detectKind(file);
+    const result = await api.uploadMedia(kind, file);
+    return result.file;
+  }, []);
+
+  /** Delete a previously uploaded file (paths under /api/media only). */
+  const deleteMedia = useCallback(async (pathOrUrl) => {
+    if (!pathOrUrl || typeof pathOrUrl !== 'string') return;
+    if (!pathOrUrl.startsWith('/api/media/') && !pathOrUrl.startsWith('media/')) return;
+    await api.deleteMedia(pathOrUrl);
+  }, []);
+
+  const hasUnsavedChanges = Object.keys(dirtySections).length > 0;
 
   const value = useMemo(
     () => ({
@@ -201,13 +180,12 @@ export const AdminProvider = ({ children }) => {
       updateListItem,
       addListItem,
       removeListItem,
-      uploadedFiles,
-      updateMedia,
-      removeMedia,
+      dirtySections,
       hasUnsavedChanges,
-      markAsSaved,
-      importContent,
-      getExportContent,
+      isSaving,
+      saveAll,
+      uploadMedia,
+      deleteMedia,
     }),
     [
       isAuthenticated,
@@ -218,13 +196,12 @@ export const AdminProvider = ({ children }) => {
       updateListItem,
       addListItem,
       removeListItem,
-      uploadedFiles,
-      updateMedia,
-      removeMedia,
+      dirtySections,
       hasUnsavedChanges,
-      markAsSaved,
-      importContent,
-      getExportContent,
+      isSaving,
+      saveAll,
+      uploadMedia,
+      deleteMedia,
     ]
   );
 

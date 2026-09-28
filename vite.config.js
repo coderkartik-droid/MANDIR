@@ -28,6 +28,13 @@ export default defineConfig({
   },
 
   server: {
+    // Dev: forward API and uploaded-media requests to the local FastAPI backend
+    proxy: {
+      '/api': {
+        target: process.env.BACKEND_URL || 'http://localhost:8001',
+        changeOrigin: true,
+      },
+    },
     fs: {
       allow: ['..'],
     },

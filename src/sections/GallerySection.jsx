@@ -1,8 +1,9 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useSyncExternalStore } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Sparkles, Maximize2, X, Eye, Layers } from 'lucide-react';
 import { galleryItems as defaultGalleryItems } from '../data/templeData';
 import { getList } from '../utils/contentLoader';
+import { subscribe as subscribeToContent, getVersion as getContentVersion } from '../utils/contentStore';
 import { soundEngine } from '../utils/audioEngine';
 import LazyImage from '../components/LazyImage';
 
@@ -10,6 +11,7 @@ export default function GallerySection() {
   const [selectedImage, setSelectedImage] = useState(null);
   const [filter, setFilter] = useState('All');
   const [galleryItems, setGalleryItems] = useState(defaultGalleryItems);
+  const contentVersion = useSyncExternalStore(subscribeToContent, getContentVersion);
 
   useEffect(() => {
     const cmsGallery = getList('gallery');
@@ -23,7 +25,7 @@ export default function GallerySection() {
         }))
       );
     }
-  }, []);
+  }, [contentVersion]);
 
   const categories = ['All', 'Architecture', 'Sacred Nature', 'Heritage'];
 

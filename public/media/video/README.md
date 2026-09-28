@@ -1,6 +1,6 @@
 # Video Media Folder
 
-Add MP4 video files here via the built-in Admin Panel (⚙️ icon → Login → Videos → Export Content ZIP) or directly via Git.
+Add MP4 video files here directly via Git, or upload them through the built-in Admin Panel (⚙️ icon → Login → Videos), which stores files on the server under `backend/media/video/`.
 
 Files placed here are served at `/media/video/<filename>.mp4`.
 

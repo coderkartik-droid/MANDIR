@@ -1,57 +1,38 @@
 # render.yaml — Render.com deployment configuration
 # Docs: https://render.com/docs/blueprint-spec
 #
-# HOW AUTO-DEPLOY WORKS:
-#   1. You push a commit to GitHub (including updated content/*.json files
-#      exported from the built-in Admin Panel).
-#   2. Render detects the push via GitHub webhook and triggers a new build.
-#   3. `npm run build` compiles the Vite app; the `dist/` folder is served.
+# ARCHITECTURE:
+#   A single Render Web Service runs the FastAPI backend (backend/main.py).
+#   In production FastAPI also serves the built React frontend from dist/,
+#   so the site and the /api content endpoints share one origin — no CORS
+#   issues, no second service, no database.
 #
-# FIRST-TIME SETUP:
-#   - Connect this repo in the Render dashboard (New → Static Site).
-#   - Set Root Directory to the repo root.
-#   - Render will pick up this file automatically.
+# HOW DEPLOYMENT WORKS:
+#   1. You push a commit to GitHub.
+#   2. Render runs the build command: installs Python deps, installs npm
+#      deps, and builds the React app into dist/.
+#   3. Render starts uvicorn; FastAPI serves dist/ + the JSON content API.
+#   4. The Admin Panel (⚙️ icon) saves content straight to backend/content
+#      *.json files and uploads media to backend/media/ on the server.
 
 services:
   - type: web
     name: shree-baba-sidhnath-mandir
-    runtime: static
-    buildCommand: npm ci && npm run build
-    staticPublishPath: ./dist
+    runtime: python
+    plan: free
+    buildCommand: pip install -r backend/requirements.txt && npm ci && npm run build
+    startCommand: uvicorn backend.main:app --host 0.0.0.0 --port $PORT
+    healthCheckPath: /api/health
     pullRequestPreviewsEnabled: true
 
-    # Node version (must match local dev)
     envVars:
+      - key: PYTHON_VERSION
+        value: "3.12.3"
       - key: NODE_VERSION
         value: "20"
-
-    # Auto-deploy on every push to main
-    autoDeploy: true
-    branch: main
-
-    # SPA routing — every path falls back to index.html
-    routes:
-      - type: rewrite
-        source: /*
-        destination: /index.html
-
-    # Static asset headers
-    headers:
-      - path: /assets/*
-        name: Cache-Control
-        value: "public, max-age=31536000, immutable"
-      - path: /media/*
-        name: Cache-Control
-        value: "public, max-age=86400"
-      - path: /audio/*
-        name: Cache-Control
-        value: "public, max-age=86400"
-      - path: /images/*
-        name: Cache-Control
-        value: "public, max-age=86400"
-      - path: /*
-        name: X-Content-Type-Options
-        value: "nosniff"
-      - path: /*
-        name: X-Frame-Options
-        value: "DENY"
+      - key: ENVIRONMENT
+        value: production
+      # Optional: comma-separated extra allowed origins for CORS.
+      # Not required in production because frontend + API share one origin.
+      - key: CORS_ORIGINS
+        sync: false

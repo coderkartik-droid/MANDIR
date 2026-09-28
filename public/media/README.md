@@ -1,10 +1,9 @@
 # Media Folder — Shree Baba Sidhnath Mandir
 
-All uploaded media is stored here inside the repository.
-The built-in Admin Panel (⚙️ icon → Login) lets you upload images, MP3 and MP4
-files. On **Export Content ZIP**, uploaded media is written into the
-`custom/` subfolders below, preserving this exact folder structure.
-Unzip the export into the project root and commit to publish.
+Legacy / manually committed media lives here inside the repository.
+Files uploaded through the built-in Admin Panel (⚙️ icon → Login) are stored
+on the server in `backend/media/{images,audio,video}/` and served at
+`/api/media/...` — they never touch this folder.
 
 ## Folder Structure
 
@@ -12,18 +11,15 @@ Unzip the export into the project root and commit to publish.
 public/media/
 │
 ├── images/
-│   ├── gallery/        ← Photo gallery uploads
+│   ├── gallery/        ← Photo gallery assets
 │   ├── temple/         ← General temple images, video thumbnails
 │   ├── hero/           ← Hero / banner images
 │   ├── festivals/      ← Festival imagery
 │   ├── icons/          ← Logo, favicon, icons
-│   ├── backgrounds/    ← Page background images
-│   └── custom/         ← Images uploaded via the Admin Panel
+│   └── backgrounds/    ← Page background images
 │
 ├── audio/              ← MP3 devotional music tracks
-│   └── custom/         ← Audio uploaded via the Admin Panel
 ├── video/              ← MP4 temple videos
-│   └── custom/         ← Videos uploaded via the Admin Panel
 └── documents/          ← PDFs, event schedules, press kits
 ```
 
